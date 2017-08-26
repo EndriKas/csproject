@@ -1,5 +1,5 @@
 compile:
-	gcc -Wall -O2 main.c neural_layer.c -o test -lgsl -lgslcblas
+	gcc -Wall  -O2 main.c neural_net.c neural_layer.c -o test -lgsl -lgslcblas
 
 
 memcheck:
