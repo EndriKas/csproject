@@ -75,9 +75,9 @@ typedef long long int   llint;
 
 typedef struct
 {
-    gsl_matrix      *W;
-    gsl_matrix      *I;
-    gsl_matrix      *Y;
+    gsl_matrix      *W;     // The synaptic weights matrix
+    gsl_matrix      *I;     // The linear aggregators matrix.
+    gsl_matrix      *Y;     // The output signals matrix.
 } neural_layer_t;
 
 
