@@ -29,6 +29,51 @@
 
 
 
+double hyperbolic_function(const void *x,const void *a,const void *b)
+{
+    assert(x!=NULL && a!=NULL && b!=NULL);
+    double *xx=NULL,*aa=NULL,*bb=NULL,result=0.0;
+    xx=(double *)x; aa=(double *)a; bb=(double *)b;
+    double numerator=1.0-exp(-((*aa)*(*xx)+(*bb)));
+    double denominator=1.0+exp(-((*aa)*(*xx)+(*bb)));
+    result=numerator/denominator; return result;
+}
+
+
+double hyperbolic_derivative(const void *x,const void *a,const void *b)
+{
+    assert(x!=NULL && a!=NULL && b!=NULL);
+    double *xx=NULL,*aa=NULL,*bb=NULL,result=0.0;
+    xx=(double *)x; aa=(double *)a; bb=(double *)b;
+    double numerator=2.0*(*aa)*exp(-((*aa)*(*xx)+*bb));
+    double denominator=pow(1.0+exp(-((*aa)*(*xx)+*bb)),2);
+    result=numerator/denominator; return result;
+}
+
+
+double logistic_function(const double *x,const double *a,const double *b)
+{
+    assert(x!=NULL && a!=NULL && b!=NULL);
+    double *xx=NULL,*aa=NULL,*bb=NULL,result=0.0;
+    xx=(double *)x; aa=(double *)a; bb=(double *)b;
+    result=1.0/(1.0+exp(-((*aa)*(*xx)+*bb)));
+    return result;
+}
+
+
+
+double logistic_derivative(const double *x,const double *a,const double *b)
+{
+    assert(x!=NULL && a!=NULL && b!=NULL);
+    double *xx=NULL,*aa=NULL,*bb=NULL,result=0.0;
+    xx=(double *)x; aa=(double *)a; bb=(double *)b;
+    double numerator=(*aa)*exp(-((*aa)*(*xx)+(*bb)));
+    double denominator=pow(1.0+exp(-((*aa)*(*xx)+(*bb))),2);
+    result=numerator/denominator; return result;
+}
+
+
+
 
 /*
  * @COMPLEXITY: O(m*n)      where m x n are the dimensions of 
@@ -87,65 +132,45 @@ double mean_square_error_calculate(const void *n,const void *d,const void *p)
         // Once summation has been completed
         // we divide it by two and add it into
         // the total error variable.
-        total_error+=sum/2.0;
+        total_error+=(double )sum/(double )2.0;
     }
     
     // To get the measurement for the global performance
     // of the training algorithm we calculate the mean
     // squared error by dividing the total erro by the
     // total number of training samples available.
-    total_error=total_error/(double )*nsamples;
+    total_error=(double )total_error/(double )(*nsamples);
     return total_error;
 }
 
 
 
-
-
-
-double logistic_function(const double *x,const double *a,const double *b)
-{
-    assert(x!=NULL && a!=NULL && b!=NULL);
-    double *xx=NULL,*aa=NULL,*bb=NULL,result;
-    xx=(double *)x; aa=(double *)a; bb=(double *)b;
-    result=1.0/(1.0+exp(-((*aa)*(*xx)+*bb)));
-    return result;
-}
-
-
-
-double logistic_derivative(const double *x,const double *a,const double *b)
-{
-    assert(x!=NULL && a!=NULL && b!=NULL);
-    double *xx=NULL,*aa=NULL,*bb=NULL,result;
-    xx=(double *)x; aa=(double *)a; bb=(double *)b;
-    double numerator=(*aa)*exp(-((*aa)*(*xx)+(*bb)));
-    double denominator=pow(1.0+exp(-((*aa)*(*xx)+(*bb))),2);
-    result=numerator/denominator; return result;
-}
-
-
-double linear_function(const double *x,const double *a,const double *b)
-{
-    assert(x!=NULL && a!=NULL && b!=NULL);
-    double *xx=NULL,*aa=NULL,*bb=NULL,result;
-    xx=(double *)x; aa=(double *)a; bb=(double *)b;
-    result=(*aa)*(*xx)+(*bb); return result;
-}
-
-
-double linear_derivative(const double *x,const double *a,const double *b)
-{
-    assert(x!=NULL && a!=NULL && b!=NULL);
-    double *aa=NULL,result; aa=(double *)a;
-    result=(*aa); return result;
-}
-
+/*
+ * @COMPLEXITY: O(l*m*n)    Where l is the number of layers
+ *                          in the neural network and the
+ *                          ( m x n ) the dimensiosn of the
+ *                          largest synaptic weights marix.
+ * 
+ * The static function forward_propagate() takes two immutable
+ * void pointers as parameters and casts the first one into
+ * a neural_net_t pointer and the second one into a gsl_vector 
+ * pointer.Once the casting has been completed the given vector
+ * is fetched as input signals into the neural network.We start
+ * by forward propagating the corresponding inputs and outputs 
+ * at each layer of the neural network until we reach the output
+ * layer.Once the output layer has been reached the corresponding
+ * output signals have been estimated.
+ *
+ * @param:  const void      *n
+ * @param:  const void      *v
+ * @return: void
+ *
+ */
 
 static void forward_propagate(const void *n,const void *v)
 {
     double wij,vi; double temp,value;
-    size_t i,j,l,s; double sum;
+    size_t i,j,l,s; double sum=0.0;
     assert(n!=NULL && v!=NULL);
     neural_net_t *nn=NULL; gsl_vector *vv=NULL;
     nn=(neural_net_t *)n; vv=(gsl_vector *)v;
@@ -186,15 +211,20 @@ static void forward_propagate(const void *n,const void *v)
 
 
 
-static void backward_propagate(const void *n,const void *v,const void *dv)
+static void backward_propagate(const void *n,const void *v,const void *dv,const void *d)
 {
-    double wij,di,dk,wkj,yi,ii,temp;
+    double wij,di,dk,wkj,yi,ii=0.0,temp;
     size_t l,i,j; double value,sum;
     assert(n!=NULL && dv!=NULL && v!=NULL);
     neural_net_t *nn=NULL; nn=(neural_net_t *)n;
     gsl_vector *dvv=NULL; dvv=(gsl_vector *)dv;
     gsl_vector *vv=NULL; vv=(gsl_vector *)v;
+    gsl_vector *delta=NULL;
+
+    delta=(gsl_vector *)d;
+    gsl_vector_view delta_view1,delta_view2;
     gsl_vector *delta_prev=NULL,*delta_curr=NULL;
+    
 
 
     for (l=nn->config->nlayers-1;l>0;l--)
@@ -207,7 +237,9 @@ static void backward_propagate(const void *n,const void *v,const void *dv)
 
         if (l+1==nn->config->nlayers)
         {
-            delta_curr=gsl_vector_alloc(dvv->size);
+            delta_view1=gsl_vector_subvector(delta,0,dvv->size);
+            delta_curr=(gsl_vector *)&delta_view1;
+
             for (i=0;i<delta_curr->size;i++)
             {
                 yi=gsl_matrix_get(Y,i,0);
@@ -222,7 +254,9 @@ static void backward_propagate(const void *n,const void *v,const void *dv)
         else
         {
             gsl_matrix *W_prev=neural_layer_getW(nn->layers[l+1]);
-            delta_curr=gsl_vector_alloc(I->size1);
+            delta_view2=gsl_vector_subvector(delta,0,I->size1);
+            delta_curr=(gsl_vector *)&delta_view2;
+
             for (i=0;i<delta_curr->size;i++)
             {
                 sum=0.0;
@@ -239,7 +273,6 @@ static void backward_propagate(const void *n,const void *v,const void *dv)
                 gsl_vector_set(delta_curr,i,temp);
             }
             
-            gsl_vector_free(delta_prev);
             delta_prev=delta_curr;
         }
 
@@ -257,10 +290,10 @@ static void backward_propagate(const void *n,const void *v,const void *dv)
         }
     }
     
-    gsl_vector_free(delta_curr);
     return;
 }
 
+    
 
 
 
@@ -284,23 +317,30 @@ static void backward_propagate(const void *n,const void *v,const void *dv)
 
 void backpropagation(const void *n,const void *d)
 {
+    size_t max_row=0;
     assert(n!=NULL && d!=NULL); llint epoch_counter;
-    size_t k1,k2,n1,n2,i; double err_curr,err_prev;
-
+    size_t l,k1,k2,n1,n2,i; double err_curr,err_prev;
     neural_net_t *nn=NULL; nn=(neural_net_t *)n;
     gsl_matrix *data=NULL; data=(gsl_matrix *)d;
-
     k1=0; k2=0; n1=data->size1; n2=nn->config->signals;
     gsl_matrix_view X=gsl_matrix_submatrix(data,k1,k2,n1,n2);
-
     k1=0; k2=nn->config->signals; n1=data->size1;
     n2=data->size2-nn->config->signals;
-    gsl_matrix_view D=gsl_matrix_submatrix(data,k1,k2,n1,n2);
-    epoch_counter=0;
+    gsl_matrix_view D=gsl_matrix_submatrix(data,k1,k2,n1,n2);     
+    gsl_vector *delta=NULL;
+    
+    for (l=0;l<nn->config->nlayers;l++)
+    {
+        gsl_matrix *temp_I=neural_layer_getI(nn->layers[l]);
+        if (max_row<temp_I->size1) { max_row=temp_I->size1; }
+    }
+    
+    delta=gsl_vector_alloc(max_row);
 
+
+    epoch_counter=0;
     do
     {
-
         err_prev=mean_square_error_calculate(nn,&D,&data->size1);
         for (i=0;i<data->size1;i++)
         {
@@ -309,12 +349,12 @@ void backpropagation(const void *n,const void *d)
             forward_propagate(nn,&vector_input_row); 
             gsl_matrix *DD=NULL; DD=(gsl_matrix *)&D;
             gsl_vector_view vector_output_row=gsl_matrix_row(DD,i);
-            backward_propagate(nn,&vector_input_row,&vector_output_row);
+            backward_propagate(nn,&vector_input_row,&vector_output_row,delta);
         }
 
-        err_curr=mean_square_error_calculate(nn,&D,&data->size1);
-        epoch_counter+=1;
-    } while (fabs(err_curr-err_prev)>nn->config->epsilon);
+        err_curr=mean_square_error_calculate(nn,&D,&data->size1); epoch_counter+=1;
+    } while (fabs(err_curr-err_prev)>nn->config->epsilon || epoch_counter<nn->config->epochs);
+    gsl_vector_free(delta);
     return;
 }
 

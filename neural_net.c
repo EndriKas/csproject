@@ -110,6 +110,29 @@ neural_net_t *neural_net_create(neural_config_t *config)
 
 
 
+
+/*
+ * @COMPLEXITY: O(l*m*n)    Where l is the number of layers
+ *                          in the neural network and the
+ *                          ( m x n ) the dimensiosn of the
+ *                          largest synaptic weights marix.
+ * 
+ * The static function forward_propagate() takes two immutable
+ * void pointers as parameters and casts the first one into
+ * a neural_net_t pointer and the second one into a gsl_vector 
+ * pointer.Once the casting has been completed the given vector
+ * is fetched as input signals into the neural network.We start
+ * by forward propagating the corresponding inputs and outputs 
+ * at each layer of the neural network until we reach the output
+ * layer.Once the output layer has been reached the corresponding
+ * output signals have been estimated.
+ *
+ * @param:  const void      *n
+ * @param:  const void      *v
+ * @return: void
+ *
+ */
+
 static void forward_propagate(const void *n,const void *v)
 {
     double wij,vi; double temp,value;
@@ -120,8 +143,6 @@ static void forward_propagate(const void *n,const void *v)
 
     for (l=0;l<nn->config->nlayers;l++)
     {
-
-
         gsl_matrix *W=neural_layer_getW(nn->layers[l]);
         gsl_matrix *I=neural_layer_getI(nn->layers[l]);
         gsl_matrix *Y=neural_layer_getY(nn->layers[l]);
@@ -152,51 +173,50 @@ static void forward_propagate(const void *n,const void *v)
 }
 
 
-static int print_matrix(FILE *f, const gsl_matrix *m)
-{
-	int status, n = 0;
 
-	for (size_t i = 0; i < m->size1; i++) {
-		for (size_t j = 0; j < m->size2; j++) {
-		    if ((status = fprintf(f, "%g ", gsl_matrix_get(m, i, j))) < 0)
-		            return -1;
-		    n += status;
-		}
-
-		if ((status = fprintf(f, "\n")) < 0)
-		        return -1;
-		n += status;
-	}
-
-	return n;
-}
-
-
-
-
+/*
+ * @COMPLEXITY: O(r*l*m*n)      Where r is the number of rows in the
+ *                              input dataset,l is the number of layers
+ *                              in the neural network and ( m x n ) are
+ *                              the dimensions of the largest synaptic
+ *                              weights matrix.
+ * 
+ * The function neural_net_predict() takes two arguments as parameters.
+ * The first argument is an neural network data structure while the
+ * second argument is a matrix that contains the input signals dataset.
+ * This function fetches every row from the input signals matrix into
+ * the neural network and retrieves the output and stores it into the
+ * results matrix.The results matrix is allocated in the heap and thereby
+ * the user has to make sure he deallocates it when it is not needed anymore.
+ *
+ * @param:  neural_net_t    *nn
+ * @param:  gsl_matrix      *data
+ *
+ */
 
 gsl_matrix *neural_net_predict(neural_net_t *nn,gsl_matrix *data)
 {
     size_t i;
     assert(nn!=NULL && data!=NULL);
-    gsl_vector_view row_vector;
+    gsl_matrix *results_matrix=NULL;
+    gsl_vector_view dest_vector,src_vector;
+    gsl_vector *dest=NULL,*src=NULL;
+    gsl_vector_view row_vector; gsl_matrix *output_Y=NULL;
+    output_Y=neural_layer_getY(nn->layers[nn->config->nlayers-1]);
+    results_matrix=gsl_matrix_alloc(data->size1,output_Y->size1);
 
     for (i=0;i<data->size1;i++)
     {
-        row_vector=gsl_matrix_row(data,i);
+        row_vector=gsl_matrix_row(data,i); 
         forward_propagate(nn,&row_vector);
-        gsl_matrix *output_Y=NULL;
-        output_Y=neural_layer_getY(nn->layers[nn->config->nlayers-1]);
-        print_matrix(stdout,output_Y);
+        src_vector=gsl_matrix_column(output_Y,0);
+        dest_vector=gsl_matrix_row(results_matrix,i);
+        dest=(gsl_vector *)&dest_vector;
+        src=(gsl_vector *)&src_vector;
+        gsl_vector_memcpy(dest,src);
     }
-    return NULL;
+    return results_matrix;
 }
-
-
-
-
-
-
 
 
 
@@ -226,15 +246,6 @@ void neural_net_train(neural_net_t *nn,gsl_matrix *data)
     nn->config->train(nn,data);
     return;
 }
-
-
-
-
-
-
-
-
-
 
 
 
