@@ -45,17 +45,17 @@ int main(int argc,char *argv[])
     config.nlayers=3;
     config.signals=2;
     config.epsilon=1e-08;
-    config.eta=0.009;
+    config.eta=0.01;
     config.alpha=1.0;
     config.beta=0.0;
     config.epochs=1000;
     config.activate=hyperbolic_function;
     config.derivative=hyperbolic_derivative;
-    config.train=backpropagation;
+    config.train=resilient_backpropagation;
 
     
     train_file=fopen("sin_pattern.data","r");
-    gsl_matrix *data=gsl_matrix_alloc(13,3);
+    gsl_matrix *data=gsl_matrix_alloc(122,3);
     gsl_matrix_fscanf(train_file,data);
     fclose(train_file);
 
@@ -63,7 +63,7 @@ int main(int argc,char *argv[])
     nn=neural_net_create(&config);
     neural_net_train(nn,data);
 
-    gsl_matrix_view Xdata=gsl_matrix_submatrix(data,0,0,13,2);
+    gsl_matrix_view Xdata=gsl_matrix_submatrix(data,0,0,122,2);
     gsl_matrix *XX=NULL; XX=(gsl_matrix *)&Xdata;
     results=neural_net_predict(nn,XX);
     
@@ -80,7 +80,7 @@ int main(int argc,char *argv[])
         }
     }*/
 
-    print_matrix(stdout,results);
+    //print_matrix(stdout,results);
     neural_net_free(nn);
     gsl_matrix_free(data);
     gsl_matrix_free(results);

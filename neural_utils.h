@@ -37,7 +37,7 @@
  *
  */
 
-void        backpropagation(const void *,const void *);
+void        resilient_backpropagation(const void *,const void *);
 double      mean_square_error_calculate(const void *,const void *,const void *);
 double      logistic_function(const double *,const double *,const double *);
 double      logistic_derivative(const double *,const double *,const double *);
@@ -51,7 +51,7 @@ double      hyperbolic_derivative(const double *,const double *,const double *);
  * the compiler and the macro NEURAL_UTILS_H
  * has been defined the neural_utils.h header
  * file will not be included more than once.
+ *
  */
 
 #endif
-
