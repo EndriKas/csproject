@@ -403,8 +403,9 @@ static void backward_propagate(const void *n,const void *v,const void *dv,const 
         }
         else
         {
-            W_prev=neural_layer_getW(nn->layers[l+1]);
             delta_curr=neural_layer_getD(nn->layers[l]);
+            W_prev=neural_layer_getW(nn->layers[l+1]);
+            //delta_curr=neural_layer_getD(nn->layers[l]);
             //delta_view=gsl_vector_subvector(delta,0,I->size1);
             //delta_temp=(gsl_vector *)&delta_view;
             //gsl_vector_memcpy(delta_temp,delta_curr);
@@ -498,7 +499,7 @@ void resilient_backpropagation(const void *n,const void *d)
         if (I_temp->size1>max_row) { max_row=I_temp->size1; }
     }
 
-    delta=gsl_vector_alloc(max_row);
+    delta=gsl_vector_calloc(max_row);
     epoch_counter=0;
 
     do
