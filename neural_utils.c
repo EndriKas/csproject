@@ -382,15 +382,14 @@ static void backward_propagate(const void *n,const void *v,const void *dv,const 
         I=neural_layer_getI(nn->layers[l]);
         Y=neural_layer_getY(nn->layers[l]);
         L=neural_layer_getL(nn->layers[l]);
-        delta_curr=neural_layer_getD(nn->layers[l]);
-        if (l>0) 
-        { 
-            Y_prev=neural_layer_getY(nn->layers[l-1]); 
-            delta_prev=neural_layer_getD(nn->layers[l-1]);
-        }
+        if (l>0) { Y_prev=neural_layer_getY(nn->layers[l-1]); }
 
         if (l+1==nn->config->nlayers)
         {
+            delta_curr=dvv;
+            //delta_view=gsl_vector_subvector(delta,0,I->size1);
+            //delta_temp=(gsl_vector *)&delta_view;
+            //gsl_vector_memcpy(delta_temp,delta_curr);
             for (i=0;i<delta_curr->size;i++)
             {
                 yi=gsl_matrix_get(Y,i,0);
@@ -400,14 +399,16 @@ static void backward_propagate(const void *n,const void *v,const void *dv,const 
                 temp=(di-yi)*value; gsl_vector_set(delta_curr,i,temp);
             }
 
-            delta_temp=dvv;
+            delta_prev=delta_curr;
         }
         else
         {
             W_prev=neural_layer_getW(nn->layers[l+1]);
-            delta_view=gsl_vector_subvector(delta,0,I->size1);
-            delta_temp=(gsl_vector *)&delta_view;
-            gsl_vector_memcpy(delta_temp,delta_curr);
+            delta_curr=neural_layer_getD(nn->layers[l]);
+            //delta_view=gsl_vector_subvector(delta,0,I->size1);
+            //delta_temp=(gsl_vector *)&delta_view;
+            //gsl_vector_memcpy(delta_temp,delta_curr);
+
             for (i=0;i<delta_curr->size;i++)
             {
                 sum=0.0;
@@ -423,28 +424,30 @@ static void backward_propagate(const void *n,const void *v,const void *dv,const 
                 temp=-sum*value; 
                 gsl_vector_set(delta_curr,i,temp);
             }
+
+            delta_prev=delta_curr;
         }
 
         for (i=0;i<W->size1;i++)
         {
             temp=gsl_vector_get(delta_curr,i);
-            temp_old=gsl_vector_get(delta_temp,i);
-            printf("temp = %g, temp_old = %g,",temp,temp_old);
-            double sign=temp*temp_old,hta=nn->config->eta;
+            //temp_old=gsl_vector_get(delta_temp,i);
+            //double sign=temp*temp_old,hta=nn->config->eta;
             for (j=0;j<W->size2;j++)
             {
                 wij=gsl_matrix_get(W,i,j);
-                lij=gsl_matrix_get(L,i,j);
+//                lij=gsl_matrix_get(L,i,j);
                 
-                if (sign>0.0) { lij=-hta*lij; }
-                else if (sign<0.0) { lij=hta*lij; }
+//                if (sign>0.0) { lij=(-1.0)*hta*lij; }
+//                else if (sign<0.0) { lij=hta*lij; }
 
                 if (l>0) { yi=gsl_matrix_get(Y_prev,j,0); }
                 else { yi=gsl_vector_get(vv,j); }
                 
-                if (temp>0.0) { wij-=lij*temp*yi; }
-                else if (temp<0.0) { wij+=lij*temp*yi; }
-                gsl_matrix_set(L,i,j,lij);
+//               if (temp>0.0) { wij-=lij*temp*yi; }
+//                else if (temp<0.0) { wij+=lij*temp*yi; }
+                wij+=nn->config->eta*temp*yi;
+//                gsl_matrix_set(L,i,j,lij);
                 gsl_matrix_set(W,i,j,wij);
             }
         }

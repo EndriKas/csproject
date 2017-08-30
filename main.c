@@ -45,10 +45,10 @@ int main(int argc,char *argv[])
     config.nlayers=3;
     config.signals=2;
     config.epsilon=1e-08;
-    config.eta=0.01;
+    config.eta=0.009;
     config.alpha=1.0;
     config.beta=0.0;
-    config.epochs=1000;
+    config.epochs=200;
     config.activate=hyperbolic_function;
     config.derivative=hyperbolic_derivative;
     config.train=resilient_backpropagation;
@@ -80,7 +80,7 @@ int main(int argc,char *argv[])
         }
     }*/
 
-    //print_matrix(stdout,results);
+    print_matrix(stdout,results);
     neural_net_free(nn);
     gsl_matrix_free(data);
     gsl_matrix_free(results);
