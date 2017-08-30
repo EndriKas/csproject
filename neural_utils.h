@@ -37,7 +37,7 @@
  *
  */
 
-void        resilient_backpropagation(const void *,const void *);
+void        backpropagation(const void *,const void *);
 double      mean_square_error_calculate(const void *,const void *,const void *);
 double      logistic_function(const double *,const double *,const double *);
 double      logistic_derivative(const double *,const double *,const double *);
@@ -55,3 +55,4 @@ double      hyperbolic_derivative(const double *,const double *,const double *);
  */
 
 #endif
+

@@ -353,43 +353,34 @@ static void forward_propagate(const void *n,const void *v)
 
 
 
-static void backward_propagate(const void *n,const void *v,const void *dv,const void *d)
+static void backward_propagate(const void *n,const void *v,const void *dv,const void *d,const void *s)
 {
-    // Variable declarations and type assertions.
-    double lij,wij,di,dk,wkj,yi,ii=0.0,temp;
-    size_t l,i,j; double value,sum,temp_old;
+    llint *iter=(llint *)d; double eta_divisor=*iter;
+    double wij,di,dk,wkj,yi,ii=0.0,temp;
+    size_t l,i,j; double value,sum;
     assert(n!=NULL && dv!=NULL && v!=NULL);
-    gsl_vector *delta_prev=NULL,*delta_curr=NULL;
-    gsl_matrix *W=NULL,*I=NULL,*Y=NULL,*L=NULL;
-    gsl_matrix *Y_prev=NULL,*W_prev=NULL;
-    gsl_vector_view delta_view;
-    gsl_vector *delta_temp=NULL;
-    
-    // Type casting the given parameters to
-    // their corresponding data structure type.
     neural_net_t *nn=NULL; nn=(neural_net_t *)n;
     gsl_vector *dvv=NULL; dvv=(gsl_vector *)dv;
     gsl_vector *vv=NULL; vv=(gsl_vector *)v;
     gsl_vector *delta=NULL; delta=(gsl_vector *)d;
-
+    gsl_vector_view delta_view1,delta_view2;
+    gsl_vector *delta_prev=NULL,*delta_curr=NULL;
     
-    // Beginning the backward propagation process
-    // by starting the iteration from the output
-    // layer all the way back to the input layer.
+
+
     for (l=nn->config->nlayers-1;l>0;l--)
     {
-        W=neural_layer_getW(nn->layers[l]);
-        I=neural_layer_getI(nn->layers[l]);
-        Y=neural_layer_getY(nn->layers[l]);
-        L=neural_layer_getL(nn->layers[l]);
+        gsl_matrix *W=neural_layer_getW(nn->layers[l]);
+        gsl_matrix *I=neural_layer_getI(nn->layers[l]);
+        gsl_matrix *Y=neural_layer_getY(nn->layers[l]);
+        gsl_matrix *Y_prev=NULL;
         if (l>0) { Y_prev=neural_layer_getY(nn->layers[l-1]); }
 
         if (l+1==nn->config->nlayers)
         {
-            delta_curr=dvv;
-            //delta_view=gsl_vector_subvector(delta,0,I->size1);
-            //delta_temp=(gsl_vector *)&delta_view;
-            //gsl_vector_memcpy(delta_temp,delta_curr);
+            delta_view1=gsl_vector_subvector(delta,0,dvv->size);
+            delta_curr=(gsl_vector *)&delta_view1;
+
             for (i=0;i<delta_curr->size;i++)
             {
                 yi=gsl_matrix_get(Y,i,0);
@@ -403,12 +394,9 @@ static void backward_propagate(const void *n,const void *v,const void *dv,const 
         }
         else
         {
-            delta_curr=neural_layer_getD(nn->layers[l]);
-            W_prev=neural_layer_getW(nn->layers[l+1]);
-            //delta_curr=neural_layer_getD(nn->layers[l]);
-            //delta_view=gsl_vector_subvector(delta,0,I->size1);
-            //delta_temp=(gsl_vector *)&delta_view;
-            //gsl_vector_memcpy(delta_temp,delta_curr);
+            gsl_matrix *W_prev=neural_layer_getW(nn->layers[l+1]);
+            delta_view2=gsl_vector_subvector(delta,0,I->size1);
+            delta_curr=(gsl_vector *)&delta_view2;
 
             for (i=0;i<delta_curr->size;i++)
             {
@@ -425,30 +413,19 @@ static void backward_propagate(const void *n,const void *v,const void *dv,const 
                 temp=-sum*value; 
                 gsl_vector_set(delta_curr,i,temp);
             }
-
+            
             delta_prev=delta_curr;
         }
 
         for (i=0;i<W->size1;i++)
         {
             temp=gsl_vector_get(delta_curr,i);
-            //temp_old=gsl_vector_get(delta_temp,i);
-            //double sign=temp*temp_old,hta=nn->config->eta;
             for (j=0;j<W->size2;j++)
             {
                 wij=gsl_matrix_get(W,i,j);
-//                lij=gsl_matrix_get(L,i,j);
-                
-//                if (sign>0.0) { lij=(-1.0)*hta*lij; }
-//                else if (sign<0.0) { lij=hta*lij; }
-
                 if (l>0) { yi=gsl_matrix_get(Y_prev,j,0); }
                 else { yi=gsl_vector_get(vv,j); }
-                
-//               if (temp>0.0) { wij-=lij*temp*yi; }
-//                else if (temp<0.0) { wij+=lij*temp*yi; }
-                wij+=nn->config->eta*temp*yi;
-//                gsl_matrix_set(L,i,j,lij);
+                wij+=(nn->config->eta/eta_divisor)*temp*yi;
                 gsl_matrix_set(W,i,j,wij);
             }
         }
@@ -464,42 +441,42 @@ static void backward_propagate(const void *n,const void *v,const void *dv,const 
 /*
  * @COMPLEXITY:
  *
- * The function resilient_backpropagation() takes two 
- * immutable pointers as arguments.The first one is cast 
- * into a neural_net_t pointer and the second one into
+ * The function backpropagation() takes two immutable
+ * pointers as arguments.The first one is cast into
+ * a neural_net_t pointer and the second one into
  * a gsl_matrix pointer.Once casting has been completed
  * The training samples are seperated from the desired
  * output samples using matrix views.Once the training
  * set X and desired output D have been defined the
- * training process for the neural network begins using
- * the resilient back-propagation algorithm.
+ * training process for the neural network begins.
  *
  * @param:  const void      *n
  * @param:  const void      *d
+ *
  * 
  */
 
-void resilient_backpropagation(const void *n,const void *d)
+void backpropagation(const void *n,const void *d)
 {
     size_t max_row=0;
     assert(n!=NULL && d!=NULL); llint epoch_counter;
     size_t l,k1,k2,n1,n2,i; double err_curr,err_prev;
     neural_net_t *nn=NULL; nn=(neural_net_t *)n;
     gsl_matrix *data=NULL; data=(gsl_matrix *)d;
-    gsl_matrix *I_temp=NULL; gsl_vector *delta=NULL;
     k1=0; k2=0; n1=data->size1; n2=nn->config->signals;
     gsl_matrix_view X=gsl_matrix_submatrix(data,k1,k2,n1,n2);
     k1=0; k2=nn->config->signals; n1=data->size1;
     n2=data->size2-nn->config->signals;
     gsl_matrix_view D=gsl_matrix_submatrix(data,k1,k2,n1,n2);     
-
+    gsl_vector *delta=NULL;
+    
     for (l=0;l<nn->config->nlayers;l++)
     {
-        I_temp=neural_layer_getI(nn->layers[l]);
-        if (I_temp->size1>max_row) { max_row=I_temp->size1; }
+        gsl_matrix *temp_I=neural_layer_getI(nn->layers[l]);
+        if (max_row<temp_I->size1) { max_row=temp_I->size1; }
     }
-
-    delta=gsl_vector_calloc(max_row);
+    
+    delta=gsl_vector_alloc(max_row);
     epoch_counter=0;
 
     do
@@ -512,11 +489,10 @@ void resilient_backpropagation(const void *n,const void *d)
             forward_propagate(nn,&vector_input_row); 
             gsl_matrix *DD=NULL; DD=(gsl_matrix *)&D;
             gsl_vector_view vector_output_row=gsl_matrix_row(DD,i);
-            backward_propagate(nn,&vector_input_row,&vector_output_row,delta);
+            backward_propagate(nn,&vector_input_row,&vector_output_row,delta,&epoch_counter);
         }
 
         err_curr=mean_square_error_calculate(nn,&D,&data->size1); epoch_counter+=1;
-//        printf("%g,",fabs(err_curr-err_prev));
     } while (fabs(err_curr-err_prev)>nn->config->epsilon || epoch_counter<nn->config->epochs);
     gsl_vector_free(delta);
     return;

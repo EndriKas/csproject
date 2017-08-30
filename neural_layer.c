@@ -90,18 +90,6 @@ neural_layer_t *neural_layer_create(llint j,llint i,int layer_type)
     // contains the linear aggregators for each neuron
     // in the current layer.
     new_nl->I=gsl_matrix_calloc(j,1);
-    
-    
-    // Allocating a new matrix data structure that
-    // contains the individual learning rates for
-    // each element of the W matrix.
-    new_nl->L=gsl_matrix_alloc(j,i);
-
-
-    // Allocating a new vector data structure that
-    // stores at each j cell the local gradient for
-    // the jth neuron in the neural layer.
-    new_nl->D=gsl_vector_calloc(j);
 
     
     // Depending on the type of the current layer
@@ -113,16 +101,13 @@ neural_layer_t *neural_layer_create(llint j,llint i,int layer_type)
     new_nl->Y=gsl_matrix_calloc(brow,1);
     
     // Popullating the cells of the weights matrix
-    // with uniform random numbers between (0,1)
-    // and the cells of the learning rate matrix
-    // with the given initial learning rate.
+    // with uniform random numbers between (0,1).
     for (row=0;row<new_nl->W->size1;row++)
     {
         for (column=0;column<new_nl->W->size2;column++)
         {
             random=gsl_rng_uniform_pos(random_gen);
             gsl_matrix_set(new_nl->W,row,column,random);
-            gsl_matrix_set(new_nl->L,row,column,random);
         }
     }
     
@@ -199,48 +184,6 @@ gsl_matrix *neural_layer_getY(neural_layer_t *nl)
 /*
  * @COMPLEXITY: Theta(1)
  *
- * The function neural_layer_getL() takes one argument
- * as parameter,namely a neural layer data structure
- * and returns the address of it's learning rate matrix
- * field.
- *
- * @param:  neural_layer_t      *nl
- * @return: gsl_matrix          *
- *
- */
-
-gsl_matrix *neural_layer_getL(neural_layer_t *nl)
-{
-    assert(nl!=NULL);
-    return nl->L;
-}
-
-
-
-/*
- * @COMPLEXITY: Theta(1)
- *
- * The function neural_layer_getD() takes one argument
- * as parameter,namely a neural layer data structure and
- * returns the address of it's local gradient vector.
- *
- * @param:  neural_layer_t  *nl
- * @param:  gsl_vector      *
- *
- */
-
-gsl_vector *neural_layer_getD(neural_layer_t *nl)
-{
-    assert(nl!=NULL);
-    return nl->D;
-}
-
-
-
-
-/*
- * @COMPLEXITY: Theta(1)
- *
  * The function neural_layer_free() takes one argument
  * as parameter,namely a neural layer data structure
  * and deallocates memory for it and it's components.
@@ -256,8 +199,6 @@ void neural_layer_free(neural_layer_t *nl)
     gsl_matrix_free(nl->W);
     gsl_matrix_free(nl->I);
     gsl_matrix_free(nl->Y);
-    gsl_matrix_free(nl->L);
-    gsl_vector_free(nl->D);
     free(nl); nl=NULL;
     return;
 }

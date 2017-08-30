@@ -61,26 +61,23 @@
  * called llint.Defining a new data structure called 
  * neural_layer_t that represents the abstract concept
  * of a layer of nodes in an artificial neural network.
- * The layer data type has three gsl matrices as fields
- * and one gsl vector field The first field,namely W, is 
- * the weight's matrix for the current layer.The second 
- * field,namely I, is the matrix that contains the linear 
- * aggregators for each neuron in the current layer.The 
- * third field,namley Y is the matrix that contains the 
- * generated output signal from each neuron in the layer.
- * The fourth field,namely delta,represents the local
- * gradient vector for the current layer.
+ * The layer data type has three gsl matrices as fields.
+ * The first field,namely W, is the weight's matrix for
+ * the current layer.The second field,namely I, is the
+ * matrix that contains the linear aggregators for each
+ * neuron in the current layer.The third field,namley Y
+ * is the matrix that contains the generated output signal
+ * from each neuron in the layer.
+ * 
  */
 
 typedef long long int   llint;
 
 typedef struct
 {
-    gsl_matrix      *W;         // The synaptic weights matrix
-    gsl_matrix      *I;         // The linear aggregators matrix.
-    gsl_matrix      *Y;         // The output signals matrix.
-    gsl_matrix      *L;         // The learning rate matrix.
-    gsl_vector      *D;         // local gradient vector.
+    gsl_matrix      *W;     // The synaptic weights matrix
+    gsl_matrix      *I;     // The linear aggregators matrix.
+    gsl_matrix      *Y;     // The output signals matrix.
 } neural_layer_t;
 
 
@@ -97,8 +94,6 @@ neural_layer_t      *neural_layer_create(llint j,llint i,int layer_type);
 gsl_matrix          *neural_layer_getW(neural_layer_t *nl);
 gsl_matrix          *neural_layer_getI(neural_layer_t *nl);
 gsl_matrix          *neural_layer_getY(neural_layer_t *nl);
-gsl_matrix          *neural_layer_getL(neural_layer_t *nl);
-gsl_vector          *neural_layer_getD(neural_layer_t *nl);
 void                neural_layer_free(neural_layer_t *nl);
 
 

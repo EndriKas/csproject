@@ -32,26 +32,27 @@ static int print_matrix(FILE *f, const gsl_matrix *m)
 
 int main(int argc,char *argv[])
 {
-    llint neurons[3];
+    llint neurons[4];
     gsl_matrix *results=NULL;
     neural_net_t *nn=NULL;
     FILE *train_file=NULL;
     neural_config_t config;
 
     neurons[0]=2;
-    neurons[1]=10;
-    neurons[2]=1;
+    neurons[1]=5;
+    neurons[2]=5;
+    neurons[3]=1;
     config.neurons=neurons;
-    config.nlayers=3;
+    config.nlayers=4;
     config.signals=2;
     config.epsilon=1e-08;
-    config.eta=0.009;
+    config.eta=0.9;
     config.alpha=1.0;
     config.beta=0.0;
     config.epochs=200;
     config.activate=hyperbolic_function;
     config.derivative=hyperbolic_derivative;
-    config.train=resilient_backpropagation;
+    config.train=backpropagation;
 
     
     train_file=fopen("sin_pattern.data","r");
