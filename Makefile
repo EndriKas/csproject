@@ -1,24 +1,29 @@
-SRC = main.c neural_net.c neural_utils.c neural_layer.c
-OBJ = main.o neural_net.o neural_utils.o neural_layer.o
-EXE = neuralnet
+EXE 	= neuralnet
+SRC		= $(wildcard $(SRC_DIR)/*.c)
+OBJ 	= $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+SRC_DIR = src
+OBJ_DIR = obj
+CFLAGS 	= -Wall -O3 -Iinclude
+LDLIBS	= -lm -lgsl -lgslcblas
 
 
 
-CC 		= gcc
-CFLAGS	= -Wall -O2
-CLIBS	= -lm -lgsl -lgslcblas
+.PHONY: all clean
+
+all: $(EXE)
 
 
+$(EXE): $(OBJ)
+	$(CC) $(CFLAGS) $^ $(LDLIBS) -o $@
 
-compile: $(OBJ) Makefile
-	$(CC) $(CFLAGS) -o $(EXE) $(OBJ) $(CLIBS)
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS)  -c $< -o $@
 
 
 clean:
-	rm -f $(OBJ) $(EXE)
-
+	rm -f $(EXE) $(OBJ)
 
 
 memcheck:
 	valgrind --leak-check=full ./$(EXE)
-
