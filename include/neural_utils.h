@@ -46,6 +46,7 @@ double      hyperbolic_derivative(const double *,const double *,const double *);
 
 
 
+
 /*
  * Once everything has been copy-pasted by
  * the compiler and the macro NEURAL_UTILS_H

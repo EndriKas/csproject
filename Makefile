@@ -3,6 +3,7 @@ SRC		= $(wildcard $(SRC_DIR)/*.c)
 OBJ 	= $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 SRC_DIR = src
 OBJ_DIR = obj
+CC		= gcc
 CFLAGS 	= -Wall -O3 -Iinclude
 LDLIBS	= -lm -lgsl -lgslcblas
 
