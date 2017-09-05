@@ -4,7 +4,7 @@ OBJ 	= $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 SRC_DIR = src
 OBJ_DIR = obj
 CC		= gcc
-CFLAGS 	= -Wall -O3 -Iinclude
+CFLAGS 	= -Wall -O2 -Iinclude
 LDLIBS	= -lm -lgsl -lgslcblas
 
 
@@ -26,5 +26,3 @@ clean:
 	rm -f $(EXE) $(OBJ)
 
 
-memcheck:
-	valgrind --leak-check=full ./$(EXE)

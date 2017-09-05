@@ -72,8 +72,9 @@ typedef void        (*TrainingFn)(const void *,const void *);
 
 typedef struct
 {
-    llint               *neurons;               // An array indicating the number of neurons per layer.
+
     llint               nlayers;                // The total number of hidden layers + output layer.
+    llint               *neurons;               // An array indicating the number of neurons per layer.
     llint               signals;                // The total number of input signals.
     double              epsilon;                // The convergence constant.
     double              eta;                    // The learning rate for the training process.
@@ -121,6 +122,8 @@ typedef struct
 neural_net_t        *neural_net_create(neural_config_t *config);
 gsl_matrix          *neural_net_predict(neural_net_t *nn,gsl_matrix *signals);
 void                neural_net_train(neural_net_t *nn,gsl_matrix *data);
+void                neural_net_dump(neural_net_t *nn,char *directory);
+neural_net_t        *neural_net_load(neural_config_t *config,char *directory);
 void                neural_net_free(neural_net_t *nn);
 
 

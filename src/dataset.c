@@ -15,7 +15,8 @@ dataset_t *dataset_create(FILE *f,int type,ScalerFn scaler)
     dataset_t *new_dataset=NULL; FILE *stream=f;
     new_dataset=(dataset_t *)malloc(sizeof(*new_dataset));
     assert(new_dataset!=NULL); new_dataset->type=type;
-    new_dataset->scaler=scaler; new_dataset->maximums=NULL;
+    new_dataset->scaler=scaler;
+    new_dataset->maximums=NULL;
     new_dataset->minimums=NULL;
     if ((flag=fgets(data,100,stream))!=NULL) { new_dataset->rows=atoi(data); }
     else { fprintf(stderr,"Could not read the number of rows.\n"); exit(EXIT_FAILURE); }

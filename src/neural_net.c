@@ -12,6 +12,7 @@
 
 /*
  * Including the standard utilities library,
+ * the standard string manipulation library,
  * the standard assertions library and the
  * "neural_net.h" header file that contains
  * datatype definitions and function prototypings
@@ -22,6 +23,10 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "neural_net.h"
 
 
@@ -286,6 +291,149 @@ void neural_net_train(neural_net_t *nn,gsl_matrix *data)
     nn->config->train(nn,data);
     return;
 }
+
+
+
+
+
+
+static void config_dump(neural_config_t *config,FILE *f)
+{
+    assert(config!=NULL && f!=NULL);
+    fwrite(&config->nlayers,sizeof(llint ),1,f);
+    fwrite(&config->neurons,sizeof(llint ),config->nlayers,f);
+    fwrite(&config->signals,sizeof(llint ),1,f);
+    fwrite(&config->epsilon,sizeof(double ),1,f);
+    fwrite(&config->eta,sizeof(double ),1,f);
+    fwrite(&config->alpha,sizeof(double ),1,f);
+    fwrite(&config->beta,sizeof(double ),1,f);
+    fwrite(&config->epochs,sizeof(llint ),1,f);
+    fwrite(&config->activate,sizeof(ActivationFn ),1,f);
+    fwrite(&config->derivative,sizeof(DerivativeFn ),1,f);
+    fwrite(&config->train,sizeof(TrainingFn ),1,f);
+    return;
+}
+
+
+
+static void weights_dump(neural_net_t *nn,FILE *f)
+{
+    size_t l;
+    gsl_matrix *tempW=NULL;
+    assert(nn!=NULL && f!=NULL);
+    for (l=0;l<nn->config->nlayers;l++)
+    {
+        tempW=neural_layer_getW(nn->layers[l]);
+        gsl_matrix_fwrite(f,tempW);
+    } return;
+}
+
+
+
+void neural_net_dump(neural_net_t *nn,char *directory)
+{
+    int len1,len2;
+    FILE *f1=NULL,*f2=NULL;
+    char *config_name="/config.bin";
+    char *weights_name="/weights.bin";
+    char *filepath1,*filepath2;
+    assert(nn!=NULL && directory!=NULL);
+    len1=strlen(directory);
+    len2=strlen(config_name);
+    filepath1=(char *)malloc((len1+len2+1)*sizeof(char ));
+    strcpy(filepath1,directory);
+    strcat(filepath1,config_name);
+    len2=strlen(weights_name);
+    filepath2=(char *)malloc((len1+len2+1)*sizeof(char ));
+    strcpy(filepath2,directory);
+    strcat(filepath2,weights_name);
+    f1=fopen(filepath1,"wb");
+    config_dump(nn->config,f1);
+    fclose(f1); f1=NULL;
+    f2=fopen(filepath2,"wb");
+    weights_dump(nn,f2);
+    fclose(f2); f2=NULL;
+    free(filepath2);
+    free(filepath1);
+    return;
+}
+    
+
+
+static void config_load(neural_config_t *config,FILE *f)
+{
+    assert(config!=NULL && f!=NULL);
+    fread(&config->nlayers,sizeof(llint ),1,f);
+    fread(&config->neurons,sizeof(llint ),config->nlayers,f);
+    fread(&config->signals,sizeof(llint ),1,f);
+    fread(&config->epsilon,sizeof(double ),1,f);
+    fread(&config->eta,sizeof(double ),1,f);
+    fread(&config->alpha,sizeof(double ),1,f);
+    fread(&config->beta,sizeof(double ),1,f);
+    fread(&config->epochs,sizeof(llint ),1,f);
+    fread(&config->activate,sizeof(ActivationFn ),1,f);
+    fread(&config->derivative,sizeof(DerivativeFn ),1,f);
+    fread(&config->train,sizeof(TrainingFn ),1,f);
+    return;
+}
+
+
+static void weights_load(neural_net_t *nn,FILE *f)
+{
+    size_t l;
+    assert(nn!=NULL && f!=NULL);
+    gsl_matrix *tempW=NULL;
+    
+    for (l=0;l<nn->config->nlayers;l++)
+    {
+        tempW=neural_layer_getW(nn->layers[l]);
+        gsl_matrix_fread(f,tempW);
+    } return;
+}
+        
+
+
+
+neural_net_t *neural_net_load(neural_config_t *config,char *directory)
+{
+    int len1,len2;
+    FILE *f1=NULL,*f2=NULL;
+    assert(directory!=NULL && config!=NULL);
+    struct stat st={0};
+    char *config_name="/config.bin";
+    char *weights_name="/weights.bin";
+    char *filepath1,*filepath2;
+    neural_net_t *new_nn=NULL;
+
+    if (stat(directory,&st)==-1)
+    {
+        fprintf(stderr,"Directory %s could not be fould.\n",directory);
+        exit(EXIT_FAILURE);
+    }
+    
+    len1=strlen(directory);
+    len2=strlen(config_name);
+    filepath1=(char *)malloc((len1+len2+1)*sizeof(char ));
+    strcpy(filepath1,directory);
+    strcat(filepath1,config_name);
+    len2=strlen(weights_name);
+    filepath2=(char *)malloc((len1+len2+1)*sizeof(char ));
+    strcpy(filepath2,directory);
+    strcat(filepath2,weights_name); 
+    f1=fopen(filepath1,"rb");
+    config_load(config,f1);
+    fclose(f1); f1=NULL;
+    new_nn=neural_net_create(config);
+    f2=fopen(filepath2,"rb");
+    weights_load(new_nn,f2);
+    fclose(f2); f2=NULL;
+    free(filepath1);
+    free(filepath2);
+    return new_nn;
+}
+
+
+
 
 
 
