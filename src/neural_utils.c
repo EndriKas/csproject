@@ -179,6 +179,23 @@ double logistic_derivative(const double *x,const double *a,const double *b)
 }
 
 
+double linear_function(const double *x,const double *a,const double *b)
+{
+    assert(x!=NULL && a!=NULL && b!=NULL);
+    double *xx=NULL,*aa=NULL,*bb=NULL,result=0.0;
+    xx=(double *)x; aa=(double *)a; bb=(double *)b;
+    result=(*aa)*(*xx)+(*bb); return result;
+}
+
+
+
+double linear_derivative(const double *x,const double *a,const double *b)
+{
+    assert(x!=NULL && a!=NULL && b!=NULL);
+    double *aa=NULL,result=0.0;
+    aa=(double *)a; result=(*aa); return result;
+}
+
 
 
 /*
@@ -353,9 +370,8 @@ static void forward_propagate(const void *n,const void *v)
 
 
 
-static void backward_propagate(const void *n,const void *v,const void *dv,const void *d,const void *s)
+static void backward_propagate(const void *n,const void *v,const void *dv,const void *d)
 {
-    llint *iter=(llint *)d; double eta_divisor=*iter;
     double wij,di,dk,wkj,yi,ii=0.0,temp;
     size_t l,i,j; double value,sum;
     assert(n!=NULL && dv!=NULL && v!=NULL);
@@ -423,7 +439,7 @@ static void backward_propagate(const void *n,const void *v,const void *dv,const 
                 wij=gsl_matrix_get(W,i,j);
                 if (l>0) { yi=gsl_matrix_get(Y_prev,j,0); }
                 else { yi=gsl_vector_get(vv,j); }
-                wij+=(nn->config->eta/eta_divisor)*temp*yi;
+                wij+=(nn->config->eta)*temp*yi;
                 gsl_matrix_set(W,i,j,wij);
             }
         }
@@ -487,11 +503,13 @@ void backpropagation(const void *n,const void *d)
             forward_propagate(nn,&vector_input_row); 
             gsl_matrix *DD=NULL; DD=(gsl_matrix *)&D;
             gsl_vector_view vector_output_row=gsl_matrix_row(DD,i);
-            backward_propagate(nn,&vector_input_row,&vector_output_row,delta,&epoch_counter);
+            backward_propagate(nn,&vector_input_row,&vector_output_row,delta);
         }
 
         err_curr=mean_square_error_calculate(nn,&D,&data->size1); epoch_counter+=1;
-    } while (fabs(err_curr-err_prev)>nn->config->epsilon || epoch_counter<nn->config->epochs);
+        printf("epochs = %lld, error = %g, convergence = %g \r",epoch_counter,err_curr,(fabs(err_curr-err_prev)));
+    } while (fabs(err_curr-err_prev)>nn->config->epsilon && epoch_counter<nn->config->epochs);
+    printf("epochs = %lld, error = %g, convergence = %g\n",epoch_counter,err_curr,(fabs(err_curr-err_prev)));
     gsl_vector_free(delta);
     return;
 }

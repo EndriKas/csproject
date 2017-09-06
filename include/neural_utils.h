@@ -43,6 +43,8 @@ double      logistic_function(const double *,const double *,const double *);
 double      logistic_derivative(const double *,const double *,const double *);
 double      hyperbolic_function(const double *,const double *,const double *);
 double      hyperbolic_derivative(const double *,const double *,const double *);
+double      linear_function(const double *,const double *,const double *);
+double      linear_derivative(const double *,const double *,const double *);
 
 
 

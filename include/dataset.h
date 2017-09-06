@@ -13,7 +13,6 @@
 typedef double  (*ScalerFn)(double ,double ,double ,double ,double );
 
 
-
 typedef struct
 {
     gsl_vector          *maximums;
@@ -23,12 +22,15 @@ typedef struct
     gsl_matrix          *data;
     int                 type;
     ScalerFn            scaler;
+    ScalerFn            descaler;
 } dataset_t;
 
 
 
 
-dataset_t           *dataset_create(FILE *f,int type,ScalerFn scaler);
+dataset_t           *dataset_create(FILE *f,int type,ScalerFn scaler,ScalerFn descaler);
+void                dataset_dump_minmax(dataset_t *ds,char *directory);
+void                dataset_load_minmax(dataset_t *ds,char *directory);
 void                dataset_scale(dataset_t *ds);
 void                dataset_free(dataset_t *ds);
 

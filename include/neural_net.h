@@ -84,6 +84,7 @@ typedef struct
     ActivationFn        activate;               // A function pointer to the activation function.
     DerivativeFn        derivative;             // A function pointer to the derivative function.
     TrainingFn          train;                  // A function pointer to the training function.
+    int                 atype;                  // A numeric value for the activation type.
 } neural_config_t;
 
 

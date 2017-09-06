@@ -301,16 +301,14 @@ static void config_dump(neural_config_t *config,FILE *f)
 {
     assert(config!=NULL && f!=NULL);
     fwrite(&config->nlayers,sizeof(llint ),1,f);
-    fwrite(&config->neurons,sizeof(llint ),config->nlayers,f);
+    fwrite(config->neurons,sizeof(llint ),config->nlayers,f);
     fwrite(&config->signals,sizeof(llint ),1,f);
     fwrite(&config->epsilon,sizeof(double ),1,f);
     fwrite(&config->eta,sizeof(double ),1,f);
     fwrite(&config->alpha,sizeof(double ),1,f);
     fwrite(&config->beta,sizeof(double ),1,f);
     fwrite(&config->epochs,sizeof(llint ),1,f);
-    fwrite(&config->activate,sizeof(ActivationFn ),1,f);
-    fwrite(&config->derivative,sizeof(DerivativeFn ),1,f);
-    fwrite(&config->train,sizeof(TrainingFn ),1,f);
+    fwrite(&config->atype,sizeof(int ),1,f);
     return;
 }
 
@@ -362,18 +360,19 @@ void neural_net_dump(neural_net_t *nn,char *directory)
 
 static void config_load(neural_config_t *config,FILE *f)
 {
+    size_t bytes=0; bytes+=0;
     assert(config!=NULL && f!=NULL);
-    fread(&config->nlayers,sizeof(llint ),1,f);
-    fread(&config->neurons,sizeof(llint ),config->nlayers,f);
-    fread(&config->signals,sizeof(llint ),1,f);
-    fread(&config->epsilon,sizeof(double ),1,f);
-    fread(&config->eta,sizeof(double ),1,f);
-    fread(&config->alpha,sizeof(double ),1,f);
-    fread(&config->beta,sizeof(double ),1,f);
-    fread(&config->epochs,sizeof(llint ),1,f);
-    fread(&config->activate,sizeof(ActivationFn ),1,f);
-    fread(&config->derivative,sizeof(DerivativeFn ),1,f);
-    fread(&config->train,sizeof(TrainingFn ),1,f);
+    bytes=fread(&config->nlayers,sizeof(llint ),1,f);
+    config->neurons=(llint *)malloc(config->nlayers*sizeof(llint ));
+    assert(config->neurons!=NULL);
+    bytes=fread(config->neurons,sizeof(llint ),config->nlayers,f);
+    bytes=fread(&config->signals,sizeof(llint ),1,f);
+    bytes=fread(&config->epsilon,sizeof(double ),1,f);
+    bytes=fread(&config->eta,sizeof(double ),1,f);
+    bytes=fread(&config->alpha,sizeof(double ),1,f);
+    bytes=fread(&config->beta,sizeof(double ),1,f);
+    bytes=fread(&config->epochs,sizeof(llint ),1,f);
+    bytes=fread(&config->atype,sizeof(int ),1,f);
     return;
 }
 
@@ -399,18 +398,10 @@ neural_net_t *neural_net_load(neural_config_t *config,char *directory)
     int len1,len2;
     FILE *f1=NULL,*f2=NULL;
     assert(directory!=NULL && config!=NULL);
-    struct stat st={0};
     char *config_name="/config.bin";
     char *weights_name="/weights.bin";
     char *filepath1,*filepath2;
-    neural_net_t *new_nn=NULL;
-
-    if (stat(directory,&st)==-1)
-    {
-        fprintf(stderr,"Directory %s could not be fould.\n",directory);
-        exit(EXIT_FAILURE);
-    }
-    
+    neural_net_t *new_nn=NULL;    
     len1=strlen(directory);
     len2=strlen(config_name);
     filepath1=(char *)malloc((len1+len2+1)*sizeof(char ));

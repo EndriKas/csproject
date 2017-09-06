@@ -1,13 +1,14 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 #include "dataset.h"
 
 
 
 
 
-dataset_t *dataset_create(FILE *f,int type,ScalerFn scaler)
+dataset_t *dataset_create(FILE *f,int type,ScalerFn scaler,ScalerFn descaler)
 {
     char data[100]; char *flag;
     assert(f!=NULL); size_t i;
@@ -16,6 +17,7 @@ dataset_t *dataset_create(FILE *f,int type,ScalerFn scaler)
     new_dataset=(dataset_t *)malloc(sizeof(*new_dataset));
     assert(new_dataset!=NULL); new_dataset->type=type;
     new_dataset->scaler=scaler;
+    new_dataset->descaler=descaler;
     new_dataset->maximums=NULL;
     new_dataset->minimums=NULL;
     if ((flag=fgets(data,100,stream))!=NULL) { new_dataset->rows=atoi(data); }
@@ -31,6 +33,56 @@ dataset_t *dataset_create(FILE *f,int type,ScalerFn scaler)
 }
 
 
+
+void dataset_dump_minmax(dataset_t *ds,char *directory)
+{
+    FILE *f=NULL;
+    int len1,len2;
+    char *filepath=NULL;
+    char *filename="/minmax.bin";
+    assert(ds!=NULL && directory!=NULL);
+    len1=strlen(directory);
+    len2=strlen(filename);
+    filepath=(char *)malloc((len1+len2+1)*sizeof(char ));
+    assert(filepath!=NULL);
+    strcpy(filepath,directory);
+    strcat(filepath,filename);
+    f=fopen(filepath,"wb");
+    fwrite(&ds->columns,sizeof(long long int ),1,f);
+    gsl_vector_fwrite(f,ds->minimums);
+    gsl_vector_fwrite(f,ds->maximums);
+    fclose(f); f=NULL; free(filepath);
+    return;
+}
+
+
+
+void dataset_load_minmax(dataset_t *ds,char *directory)
+{
+    FILE *f=NULL; int dummy=0.0;
+    int len1,len2; dummy+=0.0;
+    long long int columns;
+    char *filepath=NULL;
+    char *filename="/minmax.bin";
+    assert(ds!=NULL && directory!=NULL);
+    len1=strlen(directory);
+    len2=strlen(filename);
+    filepath=(char *)malloc((len1+len2+1)*sizeof(char ));
+    assert(filepath!=NULL);
+    strcpy(filepath,directory);
+    strcat(filepath,filename);
+    f=fopen(filepath,"rb");
+    dummy=fread(&columns,sizeof(long long int ),1,f);
+    ds->minimums=gsl_vector_alloc(columns);
+    ds->maximums=gsl_vector_alloc(columns);
+    gsl_vector_fread(f,ds->minimums);
+    gsl_vector_fread(f,ds->maximums);
+    fclose(f); f=NULL; free(filepath);
+    return;
+}
+
+
+
 void dataset_scale(dataset_t *ds)
 {
     int flag1=0,flag2=0;
@@ -40,13 +92,13 @@ void dataset_scale(dataset_t *ds)
     
     if (ds->maximums==NULL)
     {
-        ds->maximums=gsl_vector_alloc(ds->columns);
+        ds->maximums=gsl_vector_calloc(ds->columns);
         assert(ds->maximums!=NULL); flag1=1;
     }
 
     if (ds->minimums==NULL)
     {
-        ds->minimums=gsl_vector_alloc(ds->columns);
+        ds->minimums=gsl_vector_calloc(ds->columns);
         assert(ds->minimums!=NULL); flag2=1;
     }
 
@@ -56,10 +108,10 @@ void dataset_scale(dataset_t *ds)
     for (j=1;j<ds->columns;j++)
     {
         v=gsl_matrix_column(ds->data,j);
+        min=gsl_vector_min((gsl_vector *)&v);
+        max=gsl_vector_max((gsl_vector *)&v);
         if (flag1==1 && flag2==1)
         {
-            min=gsl_vector_min((gsl_vector *)&v);
-            max=gsl_vector_max((gsl_vector *)&v);
             gsl_vector_set(ds->minimums,j,min);
             gsl_vector_set(ds->maximums,j,max);
         }
@@ -77,7 +129,6 @@ void dataset_scale(dataset_t *ds)
         }
     } return;
 }
-
 
 
 
