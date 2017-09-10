@@ -50,8 +50,8 @@
  *
  */
 
-typedef double      (*ActivationFn)(const double *,const double *,const double *);
-typedef double      (*DerivativeFn)(const double *,const double *,const double *);
+typedef double      (*ActivationFn)(const void *,const void *,const void *);
+typedef double      (*DerivativeFn)(const void *,const void *,const void *);
 typedef void        (*TrainingFn)(const void *,const void *);
 
 
@@ -78,6 +78,7 @@ typedef struct
     llint               signals;                // The total number of input signals.
     double              epsilon;                // The convergence constant.
     double              eta;                    // The learning rate for the training process.
+    double              momentum;               // The momentum rate for the optimization process.
     double              alpha;                  // The alpha coefficient for the activation/derivative function.
     double              beta;                   // The beta coefficient for the activation/derivative function.
     llint               epochs;                 // The number of epochs for the training process.

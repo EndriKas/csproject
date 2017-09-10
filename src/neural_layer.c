@@ -84,12 +84,30 @@ neural_layer_t *neural_layer_create(llint j,llint i,int layer_type)
     // weights connected to the jth neuron.
     new_nl->W=gsl_matrix_alloc(j,i);
 
+
+    // allocating a new matrix data structure that
+    // has j number of rows and i number of columns.
+    // the value of j represents the total number of
+    // neurons in the current layer,while the value of
+    // i represents the total number of synaptic weights
+    // connected to the jth neuron.This matrix will contain
+    // the values of the synaptic weights from the previous
+    // training epoch.
+    new_nl->O=gsl_matrix_calloc(j,i);
     
+
     // allocating a new matrix data structure that
     // has j number of rows and one column.this matrix
     // contains the linear aggregators for each neuron
     // in the current layer.
     new_nl->I=gsl_matrix_calloc(j,1);
+
+    
+    // allocating a new matrix data structure that 
+    // has j number of rows and one column.This matrix
+    // contains the gradient values for each neuron
+    // in the current layer.
+    new_nl->D=gsl_matrix_calloc(j,1);
 
     
     // Depending on the type of the current layer
@@ -99,6 +117,7 @@ neural_layer_t *neural_layer_create(llint j,llint i,int layer_type)
     // neuron in the current layer.
     brow=(layer_type==HIDDEN_NEURAL_LAYER ? j+1 : j);
     new_nl->Y=gsl_matrix_calloc(brow,1);
+
     
     // Popullating the cells of the weights matrix
     // with uniform random numbers between (0,1).
@@ -111,6 +130,8 @@ neural_layer_t *neural_layer_create(llint j,llint i,int layer_type)
         }
     }
     
+
+
     // Deallocating memory for the random number
     // generator and returning the newly created
     // neural layer data structure.
@@ -181,6 +202,49 @@ gsl_matrix *neural_layer_getY(neural_layer_t *nl)
 
 
 
+
+/*
+ * @COMPLEXITY: Theta(1)
+ *
+ * The function neural_layer_getD() takes one argument
+ * as parameter,namely a neural layer data structure
+ * and returns the address of it's gradient matrix field.
+ *
+ * @param:  neural_layer_t      *nl
+ * @return: gsl_matrix          *
+ *
+ */
+
+gsl_matrix *neural_layer_getD(neural_layer_t *nl)
+{
+    assert(nl!=NULL);
+    return nl->D;
+}
+
+
+
+/*
+ * @COMPLEXITY: Theta(1)
+ *
+ * The function neural_layer_getO() takes one argument
+ * as parameter,namely a neural layer data structure
+ * and returns the address of it's synaptic weights
+ * matrix from the previous epoch.
+ *
+ * @param:  neural_layer_t      *nl
+ * @return: gsl_matrix          *
+ *
+ */
+
+gsl_matrix *neural_layer_getO(neural_layer_t *nl)
+{
+    assert(nl!=NULL);
+    return nl->O;
+}
+
+
+
+
 /*
  * @COMPLEXITY: Theta(1)
  *
@@ -199,6 +263,8 @@ void neural_layer_free(neural_layer_t *nl)
     gsl_matrix_free(nl->W);
     gsl_matrix_free(nl->I);
     gsl_matrix_free(nl->Y);
+    gsl_matrix_free(nl->D);
+    gsl_matrix_free(nl->O);
     free(nl); nl=NULL;
     return;
 }

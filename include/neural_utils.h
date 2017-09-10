@@ -30,6 +30,26 @@
 
 
 /*
+ * Defining macro constants representing
+ * the different color values that can be
+ * outputed from the standard output stream.
+ *
+ */
+
+#define RED   "\x1B[31m"
+#define GRN   "\x1B[32m"
+#define YEL   "\x1B[33m"
+#define BLU   "\x1B[34m"
+#define MAG   "\x1B[35m"
+#define CYN   "\x1B[36m"
+#define WHT   "\x1B[37m"
+#define RESET "\x1B[0m"
+
+
+
+
+
+/*
  * Funtion prototypings of utility procedures
  * that assist in the configuration process
  * training phase and deployment of the neural
@@ -37,14 +57,14 @@
  *
  */
 
-void        backpropagation(const void *,const void *);
-double      mean_square_error_calculate(const void *,const void *,const void *);
-double      logistic_function(const double *,const double *,const double *);
-double      logistic_derivative(const double *,const double *,const double *);
-double      hyperbolic_function(const double *,const double *,const double *);
-double      hyperbolic_derivative(const double *,const double *,const double *);
-double      linear_function(const double *,const double *,const double *);
-double      linear_derivative(const double *,const double *,const double *);
+void            backpropagation(const void *,const void *);
+double          mean_square_error_calculate(const void *,const void *,const void *);
+double          logistic_function(const void *,const void *,const void *);
+double          logistic_derivative(const void *,const void *,const void *);
+double          hyperbolic_function(const void *,const void *,const void *);
+double          hyperbolic_derivative(const void *,const void *,const void *);
+double          linear_function(const void *,const void *,const void *);
+double          linear_derivative(const void *,const void *,const void *);
 
 
 

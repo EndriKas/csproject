@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
+#include "neural_utils.h"
 #include "neural_net.h"
 
 
@@ -127,7 +128,7 @@ double hyperbolic_derivative(const void *x,const void *a,const void *b)
  *
  */
 
-double logistic_function(const double *x,const double *a,const double *b)
+double logistic_function(const void *x,const void *a,const void *b)
 {
     // Variable declarations,type assertions
     // and castings to doubles.
@@ -152,7 +153,7 @@ double logistic_function(const double *x,const double *a,const double *b)
  *
  *      f'(x) = a * e ^ - ( a * x + b ) / ( 1 + e ^ - ( a * x + b ) ) ^ 2
  *  
- *  The first order derivative of the logigistic function.
+ *  The first order derivative of the logistic function.
  *
  *  @param:     const void      *x
  *  @param:     const void      *a
@@ -161,7 +162,7 @@ double logistic_function(const double *x,const double *a,const double *b)
  *
  */
 
-double logistic_derivative(const double *x,const double *a,const double *b)
+double logistic_derivative(const void *x,const void *a,const void *b)
 {
     // Variable declarations,type assertions
     // and castings to doubles.
@@ -179,21 +180,71 @@ double logistic_derivative(const double *x,const double *a,const double *b)
 }
 
 
-double linear_function(const double *x,const double *a,const double *b)
+/*
+ * @COMPLEXITY: Theta(1)
+ *
+ * The function linear_function() takes three immutable pointers 
+ * as parameters and casts them to pointers to doubles.This function
+ * calculates the value of the linear function given by the following
+ * formula:
+ *
+ *      f(x) = a * x + b
+ *
+ *  The linear function is continuous and fully differentiable at it's
+ *  domain ( -oo, +oo ) with range ( -oo, +oo )
+ *
+ *  @param:     const void      *x
+ *  @param:     const void      *a
+ *  @param:     const void      *b
+ *  @return:    double
+ *
+ */
+
+double linear_function(const void *x,const void *a,const void *b)
 {
+    // Variable declrations,type assertions
+    // and castings to doubles.
     assert(x!=NULL && a!=NULL && b!=NULL);
     double *xx=NULL,*aa=NULL,*bb=NULL,result=0.0;
     xx=(double *)x; aa=(double *)a; bb=(double *)b;
+
+    // We calculate the value of the linear function
+    // for the given parameters and return the result.
     result=(*aa)*(*xx)+(*bb); return result;
 }
 
 
 
-double linear_derivative(const double *x,const double *a,const double *b)
+/*
+ * @COMPLEXITY: Theta(1)
+ *
+ * The function linear_derivative() takes three immutable pointers
+ * as parameters and casts them to pointers to doubles.This function
+ * calculates the value of the first order derivative of the linear
+ * function given by the following formula:
+ *
+ *      f(x) = a
+ *
+ *  The first order derivative of the linear function.
+ *
+ *  @param:     const void      *x
+ *  @param:     const void      *a
+ *  @param:     const void      *b
+ *  @return:    double
+ *
+ */
+
+double linear_derivative(const void *x,const void *a,const void *b)
 {
+    // Variable declarations,type assertions
+    // and castings to doubles.
     assert(x!=NULL && a!=NULL && b!=NULL);
-    double *aa=NULL,result=0.0;
-    aa=(double *)a; result=(*aa); return result;
+    double *aa=NULL,result=0.0; aa=(double *)a; 
+
+    // We calculate the value of the first order
+    // derivative of the linear function and return
+    // the results.
+    result=(*aa); return result;
 }
 
 
@@ -228,7 +279,7 @@ double mean_square_error_calculate(const void *n,const void *d,const void *p)
     
     // Casting the given parameters into their
     // corresponding datatype pointer.
-    llint *nsamples=NULL; nsamples=(llint *)p;
+    size_t *nsamples=NULL; nsamples=(size_t *)p;
     neural_net_t *nn=NULL; nn=(neural_net_t *)n;
     gsl_matrix *D=NULL,*Y=NULL; D=(gsl_matrix *)d;
 
@@ -370,77 +421,202 @@ static void forward_propagate(const void *n,const void *v)
 
 
 
-static void backward_propagate(const void *n,const void *v,const void *dv,const void *d)
-{
-    double wij,di,dk,wkj,yi,ii=0.0,temp;
-    size_t l,i,j; double value,sum;
-    assert(n!=NULL && dv!=NULL && v!=NULL);
-    neural_net_t *nn=NULL; nn=(neural_net_t *)n;
-    gsl_vector *dvv=NULL; dvv=(gsl_vector *)dv;
-    gsl_vector *vv=NULL; vv=(gsl_vector *)v;
-    gsl_vector *delta=NULL; delta=(gsl_vector *)d;
-    gsl_vector_view delta_view1,delta_view2;
-    gsl_vector *delta_prev=NULL,*delta_curr=NULL;
-    
-    for (l=nn->config->nlayers-1;l>0;l--)
-    {
-        gsl_matrix *W=neural_layer_getW(nn->layers[l]);
-        gsl_matrix *I=neural_layer_getI(nn->layers[l]);
-        gsl_matrix *Y=neural_layer_getY(nn->layers[l]);
-        gsl_matrix *Y_prev=NULL;
-        if (l>0) { Y_prev=neural_layer_getY(nn->layers[l-1]); }
+/*
+ * @COMPLEXITY: 
+ *
+ * The function backward_propagate() takes three immutable pointers as parameters.
+ * The first parameter is cast into a neural_net_t data structure.The second and
+ * the third one are cast into gsl_vector data structures.This function iterates
+ * backwards,namely from the output layer to the input layer and adjusts the 
+ * synaptic weights of each layer.First the adjusted synaptic weights of the
+ * neurons of the output layer are calculated by comparing the deviation of
+ * the produced responses and the corresponding desired values.Secondly this 
+ * error back-propagates to the neurons of the previous layer weighted by the
+ * values of the synaptic weights that were previously adjusted in all the
+ * posterior layers.Consequently,the desired response of a neuron in a hidden
+ * layer must be determined with respect to the neurons that are directly
+ * connected to it and that have been already adjusted in the previous stage.
+ *
+ * @param:  const void      *n
+ * @param:  const void      *in
+ * @param:  const void      *out
+ * @return: void
+ *
+ */
 
+static void backward_propagate(const void *n,const void *in,const void *out)
+{
+    // Variable declarations and type assertions.
+    // Most of the declared variables have been
+    // named in such a way as to provide a detailed
+    // walkthrough of the back-propagate procedure.
+    llint l; size_t k,j,i; double wji,wji_o,shift;
+    double yj,dj,value,ij,yi,wkj,dk,sum;
+    assert(n!=NULL && in!=NULL && out!=NULL);
+    gsl_matrix *W=NULL; gsl_matrix *I=NULL;
+    gsl_matrix *Y=NULL; gsl_matrix *D=NULL;
+    gsl_matrix *O=NULL; gsl_matrix *prevY=NULL;
+    gsl_matrix *postW=NULL; gsl_matrix *postD=NULL;
+    
+
+    // Casting the first parameter into a neural_net_t
+    // data structure and the second and third into a
+    // gsl_vector data structure.
+    neural_net_t *nn=NULL; nn=(neural_net_t *)n;
+    gsl_vector *input=NULL;input=(gsl_vector *)in;
+    gsl_vector *output=NULL; output=(gsl_vector *)out;
+    
+    
+    // Beginning the iteration from the output layer
+    // all the way to the input layer of the neural net.
+    for (l=nn->config->nlayers-1;l>=0;l--)
+    {
+        // Retrieving the synaptic weights matrix
+        // for the current layer.The components of
+        // this matrix are adjusted during this process.
+        W=neural_layer_getW(nn->layers[l]);
+
+        // Retrieving the linear aggregators matrix for
+        // the current layer.This matrix will be used 
+        // during the adjustment of the synaptic weights.
+        I=neural_layer_getI(nn->layers[l]);
+
+        // Retrieving the signals output matrix for the
+        // current layer.This matrix will also be used
+        // during the adjustment of the synaptic weights.
+        Y=neural_layer_getY(nn->layers[l]);
+
+        // Retrieving the local gradient matrix for the
+        // current layer.This matrix will be used during
+        // the adjustment of the synaptic weights.
+        D=neural_layer_getD(nn->layers[l]);
+
+        // Retrieving the synaptic weights matrix from
+        // the previous training epoch.This matrix will
+        // be used for the optimization technique aka
+        // momentum parameter optimization.
+        O=neural_layer_getO(nn->layers[l]);
+
+        
+        // If we are not at the input layer, retrieve the 
+        // signals output matrix from the previous layer.
+        if (l>0) { prevY=neural_layer_getY(nn->layers[l-1]); }
+
+
+        // There are two main stage to the back-propagation
+        // process.The first stage concerns the adjustment
+        // of the output layer which is done using the given
+        // desired output signals.The second stage concerns
+        // the adjustment of the intermediate layers which
+        // do not have access to the desired values for outputs.
         if (l+1==nn->config->nlayers)
         {
-            delta_view1=gsl_vector_subvector(delta,0,dvv->size);
-            delta_curr=(gsl_vector *)&delta_view1;
-
-            for (i=0;i<delta_curr->size;i++)
+            // iterating over the elements of the
+            // current local gradient matrix.
+            for (j=0;j<D->size1;j++)
             {
-                yi=gsl_matrix_get(Y,i,0);
-                di=gsl_vector_get(dvv,i);
-                ii=gsl_matrix_get(I,i,0);
-                value=nn->config->derivative(&ii,&nn->config->alpha,&nn->config->beta);
-                temp=(di-yi)*value; gsl_vector_set(delta_curr,i,temp);
+                // The calculation for the local gradient
+                // related to the jth neuron in the output
+                // layer is given by the following formula:
+                //
+                //      delta(j) = ( output(j) - Y(j) ) * g'(I(j)) 
+                //
+                // Where g is the derivative of the activation function.
+                // The components of the gradient matrix are overwritten
+                // in-place without needing the allocation of extra memory.
+                yj=gsl_matrix_get(Y,j,0);
+                dj=gsl_vector_get(output,j);
+                ij=gsl_matrix_get(I,j,0);
+                value=nn->config->derivative(&ij,&nn->config->alpha,&nn->config->beta);
+                gsl_matrix_set(D,j,0,(dj-yj)*value);
             }
-
-            delta_prev=delta_curr;
         }
         else
         {
-            gsl_matrix *W_prev=neural_layer_getW(nn->layers[l+1]);
-            delta_view2=gsl_vector_subvector(delta,0,I->size1);
-            delta_curr=(gsl_vector *)&delta_view2;
+            // For the calculation of the local gradient
+            // matrix for the hidden layers we are going
+            // to require the synaptic weights matrix and
+            // the local gradient matrix of the posterior
+            // neural layer of the network.
+            postW=neural_layer_getW(nn->layers[l+1]);
+            postD=neural_layer_getD(nn->layers[l+1]); 
 
-            for (i=0;i<delta_curr->size;i++)
+            // Iterating over the elements of the
+            // current local gradient matrix.
+            for (j=0;j<D->size1;j++)
             {
+                // Before we calculate the local gradient related to the jth neuron,
+                // first we have to sum up the multiplication of the local gradients
+                // and synaptic weights of all neurons of the posterior layer that
+                // are connected to the current jth neuron of the current layer.
                 sum=0.0;
-                for (j=0;j<W_prev->size1;j++)
+                for (k=1;k<postW->size1;k++)
                 {
-                    dk=gsl_vector_get(delta_prev,j);
-                    wkj=gsl_matrix_get(W_prev,j,i);
-                    sum+=dk*wkj;
+                    // The summation is calculated using the 
+                    // following formula:
+                    //
+                    //      Sum = Sum + posterior_delta(k)*posterior_W(k,j)
+                    //
+                    // We iterate over all neurons connected to the current
+                    // jth neuron and aggregate the expected desired output value.
+                    wkj=gsl_matrix_get(postW,k,j);
+                    dk=gsl_matrix_get(postD,k,0);
+                    sum+=wkj*dk;
                 }
-
-                ii=gsl_matrix_get(I,i,0);
-                value=nn->config->derivative(&ii,&nn->config->alpha,&nn->config->beta);
-                temp=-sum*value; 
-                gsl_vector_set(delta_curr,i,temp);
+                
+                // To calculate the local gradient related to the jth neuron
+                // of the current layer we use sum obtained above and the
+                // following formula:
+                //
+                //      delta(j) = - ( sum ) * g'(I(j))
+                // 
+                // Where g' is the derivative of the activaion function.
+                // The components of the gradient matrix are overwritten
+                // in-place without needing the allocation of extra memory.
+                ij=gsl_matrix_get(I,j,0);
+                value=nn->config->derivative(&ij,&nn->config->alpha,&nn->config->beta);
+                gsl_matrix_set(D,j,0,-sum*value);
             }
-            
-            delta_prev=delta_curr;
         }
-
-        for (i=0;i<W->size1;i++)
+        
+        // Once we have calculate the corresponding local gradient
+        // matrix,it is time to adjust the synaptic weights of the
+        // current neural layer.We begin iterating over the rows of
+        // the synaptic weights matrix for the current layer.
+        for (j=0;j<W->size1;j++)
         {
-            temp=gsl_vector_get(delta_curr,i);
-            for (j=0;j<W->size2;j++)
+            // Retrieve the current local gradient
+            // related to the jth neuron of the current
+            // neural layer and iterating over the columns
+            // of the synaptic weights matrix.
+            dj=gsl_matrix_get(D,j,0);
+            for (i=0;i<W->size2;i++)
             {
-                wij=gsl_matrix_get(W,i,j);
-                if (l>0) { yi=gsl_matrix_get(Y_prev,j,0); }
-                else { yi=gsl_vector_get(vv,j); }
-                wij+=(nn->config->eta)*temp*yi;
-                gsl_matrix_set(W,i,j,wij);
+                // Retrieving the current value of the synaptic
+                // weights matrix cell and it's value from the
+                // previous training epoch.
+                wji=gsl_matrix_get(W,j,i);
+                wji_o=gsl_matrix_get(O,j,i);
+
+                // Checking if we are at the hidden layers or
+                // we have reach the input layer.If we are at
+                // the hidden layers we use the output signals
+                // of the previous layer otherwise we use the
+                // given input signals.
+                if (l>0)    { yi=gsl_matrix_get(prevY,i,0); }
+                else        { yi=gsl_vector_get(input,i);   }
+                
+                // Calculating the total amount the current synaptic
+                // weights cell is going to be shifted by the following
+                // formula:
+                //
+                //      W(j,i) = W(j,i) + momentum * ( W(j,i) - O(j,i) ) + hta * delta(j) * Y(i)
+                // 
+                // Once the shift has been calculated the cell is updated and
+                // so previous value written into the O matrix.
+                shift=wji+0.09*(wji-wji_o)+(nn->config->eta)*dj*yi;
+                gsl_matrix_set(O,j,i,wji);
+                gsl_matrix_set(W,j,i,shift);
             }
         }
     }
@@ -448,7 +624,7 @@ static void backward_propagate(const void *n,const void *v,const void *dv,const 
     return;
 }
 
-    
+
 
 
 
@@ -466,51 +642,71 @@ static void backward_propagate(const void *n,const void *v,const void *dv,const 
  *
  * @param:  const void      *n
  * @param:  const void      *d
- *
+ * @return: void
  * 
  */
 
 void backpropagation(const void *n,const void *d)
 {
-    size_t max_row=0;
-    assert(n!=NULL && d!=NULL); llint epoch_counter;
-    size_t l,k1,k2,n1,n2,i; double err_curr,err_prev;
-    neural_net_t *nn=NULL; nn=(neural_net_t *)n;
-    gsl_matrix *data=NULL; data=(gsl_matrix *)d;
+    // Variable declarations and initializations
+    // and type verifications.
+    size_t k1,k2,n1,n2,i; 
+    assert(n!=NULL && d!=NULL); llint epoch_counter=0;
+    double err_curr=1.0,err_prev=1.0,loss=0.0;
+    neural_net_t *nn=NULL; gsl_matrix *data=NULL;
+    gsl_vector_view vector_input_row;
+    gsl_vector_view vector_output_row;
+
+    
+    // Casting the given parameters into the corresponding
+    // datatypes.The first one into a neural_net_t data
+    // structure and the second one into a gsl_matrix.
+    nn=NULL; nn=(neural_net_t *)n;
+    data=NULL; data=(gsl_matrix *)d;
+    
+
+    // Retrieving a matrix view of the given dataset
+    // for the signals input only.More specifically
+    // the X component of the dataset.
     k1=0; k2=0; n1=data->size1; n2=nn->config->signals;
     gsl_matrix_view X=gsl_matrix_submatrix(data,k1,k2,n1,n2);
+    
+
+    // Retrieving a matrix view of the given dataset
+    // for the desired output only.More specifically
+    // the Y component of the dataset.
     k1=0; k2=nn->config->signals; n1=data->size1;
     n2=data->size2-nn->config->signals;
-    gsl_matrix_view D=gsl_matrix_submatrix(data,k1,k2,n1,n2);     
-    gsl_vector *delta=NULL;
+    gsl_matrix_view D=gsl_matrix_submatrix(data,k1,k2,n1,n2);
     
-    for (l=0;l<nn->config->nlayers;l++)
-    {
-        gsl_matrix *temp_I=neural_layer_getI(nn->layers[l]);
-        if (max_row<temp_I->size1) { max_row=temp_I->size1; }
-    }
-    
-    delta=gsl_vector_alloc(max_row);
-    epoch_counter=0;
-
+    // Beginning the training process of the back-propagation
+    // algorithm.We stop the procedure when the maximum epoch
+    // limit or convergence limit has beenr reached. 
     do
     {
+        // Calculate the current mse value and begin
+        // iterating over the given training dataset.
         err_prev=mean_square_error_calculate(nn,&D,&data->size1);
         for (i=0;i<data->size1;i++)
         {
-            gsl_matrix *XX=NULL; XX=(gsl_matrix *)&X;
-            gsl_vector_view vector_input_row=gsl_matrix_row(XX,i);
-            forward_propagate(nn,&vector_input_row); 
-            gsl_matrix *DD=NULL; DD=(gsl_matrix *)&D;
-            gsl_vector_view vector_output_row=gsl_matrix_row(DD,i);
-            backward_propagate(nn,&vector_input_row,&vector_output_row,delta);
+            // Get the ith input row and fetch it into the
+            // neural network using the forward_propagate procedure.
+            vector_input_row=gsl_matrix_row((gsl_matrix *)&X,i);
+            forward_propagate(nn,&vector_input_row);
+            
+            // Get the ith output row and fetch it into the
+            // neural network using the backward propagate procedure.
+            vector_output_row=gsl_matrix_row((gsl_matrix *)&D,i);
+            backward_propagate(nn,&vector_input_row,&vector_output_row);
         }
-
-        err_curr=mean_square_error_calculate(nn,&D,&data->size1); epoch_counter+=1;
-        printf("epochs = %lld, error = %g, convergence = %g \r",epoch_counter,err_curr,(fabs(err_curr-err_prev)));
-    } while (fabs(err_curr-err_prev)>nn->config->epsilon && epoch_counter<nn->config->epochs);
-    printf("epochs = %lld, error = %g, convergence = %g\n",epoch_counter,err_curr,(fabs(err_curr-err_prev)));
-    gsl_vector_free(delta);
+        
+        // Retrieve the mean square error value after the current training
+        // epoch and increment the epoch counter by one.Print the epoch
+        // counter,current loss and the current mean square error into the
+        // standard output stream.
+        err_curr=mean_square_error_calculate(nn,&D,&data->size1); epoch_counter+=1; loss=fabs(err_curr-err_prev);
+        printf(CYN"EPOCHS"RESET" = %lld, "RED"LOSS"RESET" = %g, "YEL"MSE"RESET" = %g\n",epoch_counter,loss,err_curr);
+    } while (loss>nn->config->epsilon && epoch_counter<nn->config->epochs);
     return;
 }
 

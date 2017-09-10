@@ -291,7 +291,7 @@ int read_activation(int argc,char **argv)
 double read_epsilon(int argc,char **argv)
 {
     if (argc>=11 && strstr(argv[10],"--epsilon=")!=NULL) { return atof(&argv[10][10]); }
-    double epsilon=1e-08; return epsilon;
+    double epsilon=1e-50; return epsilon;
 }
 
 
@@ -305,7 +305,7 @@ double read_eta(int argc,char **argv)
 llint read_epochs(int argc,char **argv)
 {
     if (argc>=13 && strstr(argv[12],"--epochs=")!=NULL) { return atoll(&argv[12][9]); }
-    llint epochs=1000; return epochs;
+    llint epochs=100000; return epochs;
 }
 
 double read_alpha(int argc,char **argv)
@@ -346,31 +346,38 @@ void usage(void)
         "\n"
         "   For the training process of the neural network:\n"
         "\n"
-        "       ./neuralnet --train ( --curve-fitting | --pattern-classification ) --normalization=<yes|no> --in-file=<filepath> --dump-dir=<filepath> --signals=<number> \n"
-        "           --nlayers=<number> --neurons-per-layer=<[ number, .. ]>  [--epsilon=<number>] [--eta=<number>] [--epochs=<number>] [--alpha=<number>] [--beta=<number>]\n"
+        "       ./neuralnet --train ( --curve-fitting | --pattern-classification ) --normalization=<yes|no> --in-file=<filepath> --dump-dir=<filepath> --signals=<number> --nlayers=<number>\n"
+        "                   --neurons-per-layer=<[ number, .. ]> --activation=<lnr|lgst|htan>  [--epsilon=<number>] [--eta=<number>] [--epochs=<number>] [--alpha=<number>] [--beta=<number>]\n"
         "\n"
         "   For the prediction process of the neural network:\n"
         "\n"
         "       ./neuralnet --predict ( --curve-fitting | --pattern-classification ) --normalization=<yes|no>  --in-file=<filepath> --load-dir=<filepath>\n"
         "\n"
         "Available options:\n"
-        "   --train                             set execution type to training.\n"
-        "   --predict                           set execution type to prediction.\n"
-        "   --curve-fitting                     set training mode to curve fitting.\n"
-        "   --pattern-classification            set training mode to pattern classification.\n"
-        "   --normalization=<yes|no>            Whether to normalize the dataset or not.\n"
-        "   --in-file=<filepath>                the filepath from which to read the training data.\n"
-        "   --dump-dir=<filepath>               the name of the directory to dump the trained neural network.\n"
-        "   --load-dir=<filepath>               The name of the directory from which to load the trained neural network.\n"
-        "   --signals=<number>                  The number of input signals or features.\n"
-        "   --nlayers=<number>                   The number of layers for the neural network.\n"
-        "   --neurons-per-layer=<[n1,n2,..]>    The number of neurons per layer.\n"
-        "   [--epsion=<number>]                 The convernge rate ( optional ).\n"
-        "   [--eta=<number>]                    The learning rate ( optional ).\n"
-        "   [--epochs=<number>]                 The number of epochs for the training session ( optional ).\n"
-        "   [--alpha=<number>]                  The first coefficient of the activation function ( optional ).\n"
-        "   [--beta=<number>]                   The second coefficient of the activation function ( optional ).\n"
+        "   --train                             This flag sets the execution mode to training.\n"
+        "   --predict                           This flag sets the execution mode to predicting.\n"
+        "   --curve-fitting                     This flag sets the training process to curve fitting.\n"
+        "   --pattern-classification            This flag sets the training process to pattern classification..\n"
+        "   --normalization=<yes|no>            This flag sets the normalization of the given data to on/off.\n"
+        "   --in-file=<filepath>                This flag sets the name of the file that contains the training dataset.\n"
+        "   --dump-dir=<filepath>               This flag sets the name of the directory where the trained model will be stored.\n"
+        "   --load-dir=<filepath>               This flag sets the name of the directory from which to load a trained model.\n"
+        "   --signals=<number>                  This flag sets the number of input signals (features) the dataset contains.\n"
+        "   --nlayers=<number>                  This flag sets the number of layers the neural network should have.\n"
+        "   --neurons-per-layer=<[n1,n2,..]>    This flag sets the number of neurons per layer the neural network should have.\n"
+        "   --activation=<lnr|lgst|htan>        This flag sets the type of activation function for training process.\n"
+        "   [--epsilon=<number>]                This flag sets the mse convergence value for the training process.  ( optional ).\n"
+        "   [--eta=<number>]                    This flag sets the learning rate for the training process.          ( optional ).\n"
+        "   [--epochs=<number>]                 This flag sets the number of epochs for the training process.       ( optional ).\n"
+        "   [--alpha=<number>]                  This flag sets the first coefficient for the activation function.   ( optional ).\n"
+        "   [--beta=<number>]                   This flag sets the second coefficient of the activation function.   ( optional ).\n"
         "   --help                              Print the help message and quit program execution.\n"
+        "\n"
+        "   **  The files containing the training dataset must have the total number of\n"
+        "       rows and columns in the first line and second line respectively\n"
+        "\n"
+        "   **  The files containing the newly unseen dataset mut have the total number of\n"
+        "       rows and columns in the first line and second line respectively and have no target column.\n"
         "\n"
         "author: (c), Endri Kastrati, email: endriau@gmail.com\n";
     fprintf(stderr,"%s",content);

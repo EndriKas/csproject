@@ -67,7 +67,8 @@
  * matrix that contains the linear aggregators for each
  * neuron in the current layer.The third field,namley Y
  * is the matrix that contains the generated output signal
- * from each neuron in the layer.
+ * from each neuron in the layer.The fourth field,namely
+ * D is the gradient value for each neuron in the layer.
  * 
  */
 
@@ -78,6 +79,8 @@ typedef struct
     gsl_matrix      *W;     // The synaptic weights matrix
     gsl_matrix      *I;     // The linear aggregators matrix.
     gsl_matrix      *Y;     // The output signals matrix.
+    gsl_matrix      *D;     // The gradient matrix.
+    gsl_matrix      *O;     // The synaptic weights of the previous epoch.
 } neural_layer_t;
 
 
@@ -94,6 +97,8 @@ neural_layer_t      *neural_layer_create(llint j,llint i,int layer_type);
 gsl_matrix          *neural_layer_getW(neural_layer_t *nl);
 gsl_matrix          *neural_layer_getI(neural_layer_t *nl);
 gsl_matrix          *neural_layer_getY(neural_layer_t *nl);
+gsl_matrix          *neural_layer_getD(neural_layer_t *nl);
+gsl_matrix          *neural_layer_getO(neural_layer_t *nl);
 void                neural_layer_free(neural_layer_t *nl);
 
 
