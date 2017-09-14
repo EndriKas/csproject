@@ -241,25 +241,48 @@ static void forward_propagate(const void *n,const void *v)
 
 gsl_matrix *neural_net_predict(neural_net_t *nn,gsl_matrix *data)
 {
+    // Variable declarations
+    // type assertions and
+    // default instantiations.
     size_t i;
     assert(nn!=NULL && data!=NULL);
     gsl_matrix *results_matrix=NULL;
     gsl_vector_view dest_vector,src_vector;
     gsl_vector *dest=NULL,*src=NULL;
     gsl_vector_view row_vector; gsl_matrix *output_Y=NULL;
+
+    // Retrieving the outputs signal matrix for the output layer
+    // of the neural network and allocating memory for the new
+    // results matrix based on the dimensions of the Y matrix.
     output_Y=neural_layer_getY(nn->layers[nn->config->nlayers-1]);
     results_matrix=gsl_matrix_alloc(data->size1,output_Y->size1);
-
+    
+    // Iterating over the rows given datasets
     for (i=0;i<data->size1;i++)
     {
+        // Reading the data at the first row
+        // as a matrix view and applying the
+        // forward propagation procdure to
+        // predict or classify the corresponding
+        // output signals values.
         row_vector=gsl_matrix_row(data,i); 
         forward_propagate(nn,&row_vector);
+
+        
+        // Copying the results of the output signals
+        // matrix into a vector view and then copying
+        // those values into the first row of the results
+        // matrix.
         src_vector=gsl_matrix_column(output_Y,0);
         dest_vector=gsl_matrix_row(results_matrix,i);
         dest=(gsl_vector *)&dest_vector;
         src=(gsl_vector *)&src_vector;
         gsl_vector_memcpy(dest,src);
     }
+
+    // Returning the estimated output
+    // signals in the form of a matrix
+    // data structure.
     return results_matrix;
 }
 
@@ -296,6 +319,21 @@ void neural_net_train(neural_net_t *nn,gsl_matrix *data)
 
 
 
+/*
+ * @COMPLEXITY: Theta(l)    where l is the total number of
+ *                          layers in the neural network.
+ * 
+ * The static function config_dump() takes two arguments
+ * as parameters.The first argument is a neural configuration
+ * data structure and the second one a stream data structure.
+ * This function saves the field components of the configuration
+ * datatype as binary into the given stream address.
+ *
+ * @param:  neural_config_t     *config
+ * @param:  FILE                *f
+ * @return: void
+ *
+ */
 
 static void config_dump(neural_config_t *config,FILE *f)
 {
@@ -314,6 +352,24 @@ static void config_dump(neural_config_t *config,FILE *f)
 
 
 
+
+/*
+ * @COMPLEXITY: O(m*n)  Where ( m x n ) are the dimensions
+ *                      of the largest synpatic weights
+ *                      matrix in the neural network.
+ * 
+ * The static function weights_dump() takes two arguments
+ * as parameters.The first argument is a neural_net_t data
+ * structure and the second argument is a stream data structure.
+ * This function saves the synaptic weights matrices of the
+ * neural network as binary into the given stream address.
+ *
+ * @param:  neural_net_t        *nn
+ * @param:  FILE                *f
+ * @return: void
+ *
+ */
+
 static void weights_dump(neural_net_t *nn,FILE *f)
 {
     size_t l;
@@ -327,6 +383,24 @@ static void weights_dump(neural_net_t *nn,FILE *f)
 }
 
 
+
+
+/*
+ * @COMPLEXITY: O(m*n)  Where ( m x n ) are the dimensions
+ *                      of the largest synaptic weights
+ *                      matrix in the neural network.
+ * 
+ * The function neural_net_dump() takes two arguments
+ * as parameters,namely a neural_net_t data structure
+ * and a directory name and dumps the configuration data
+ * as well as the synaptic weights of the neural network
+ * into the given directory folder.
+ *
+ * @param:  neural_net_t        *nn
+ * @param:  char                *directory
+ * @return: void
+ *
+ */
 
 void neural_net_dump(neural_net_t *nn,char *directory)
 {
@@ -358,6 +432,23 @@ void neural_net_dump(neural_net_t *nn,char *directory)
     
 
 
+/*
+ * @COMPLEXITY: O(l)    Where l is the total number
+ *                      of neural layers in the neural
+ *                      network data structure.
+ * 
+ * The static function config_load() takes two arguments
+ * as parameters,namely a neural configuration data structure
+ * and a stream data structure and loads the configuration data
+ * stored in the corresponding binary file into the given config
+ * data structure.
+ *
+ * @param:  neural_config_nt    *config
+ * @param:  FILE                *f
+ * @return: void
+ *
+ */
+
 static void config_load(neural_config_t *config,FILE *f)
 {
     size_t bytes=0; bytes+=0;
@@ -377,6 +468,24 @@ static void config_load(neural_config_t *config,FILE *f)
 }
 
 
+
+/*
+ * @COMPLEXITY: O(m*n)  Where ( m x n ) are the dimensions
+ *                      of the largest synaptic weights matrix
+ *                      of the neural network data structure.
+ * 
+ * The static function weights_load() takes two arguments as
+ * parameters,namely a neural network data structure and a
+ * stream data structure and loads the synaptic weights matrices
+ * stored in the corresponding binary file into the given neural
+ * network data structure.
+ *
+ * @param:  neural_net_t    *nn
+ * @param:  FILE            *f
+ * @return: void
+ *
+ */
+
 static void weights_load(neural_net_t *nn,FILE *f)
 {
     size_t l;
@@ -392,6 +501,24 @@ static void weights_load(neural_net_t *nn,FILE *f)
         
 
 
+/*
+ * @COMPLEXITY: O(m*n)      Where ( m x n ) are the dimensions of
+ *                          the largest synaptic weights matrix of
+ *                          the neural network data structure.
+ * 
+ * The function neural_net_load() takes two arguments as parameters,
+ * namely a neural configuration data structure and a directory name
+ * and loads the binary data stored in the directory into the given
+ * config datatype and then instantiates a new neural network data 
+ * structure and loads the synaptic weights and the configuration data
+ * into the newly instantiated neural network.Once the loading has been
+ * completed the address of the newly created neural net is returned.
+ *
+ * @param:  neural_config_t     *config
+ * @param:  char                *directory
+ * @return: neural_net_t        *
+ *
+ */
 
 neural_net_t *neural_net_load(neural_config_t *config,char *directory)
 {

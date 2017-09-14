@@ -614,7 +614,7 @@ static void backward_propagate(const void *n,const void *in,const void *out)
                 // 
                 // Once the shift has been calculated the cell is updated and
                 // so previous value written into the O matrix.
-                shift=wji+0.09*(wji-wji_o)+(nn->config->eta)*dj*yi;
+                shift=wji+nn->config->momentum*(wji-wji_o)+(nn->config->eta)*dj*yi;
                 gsl_matrix_set(O,j,i,wji);
                 gsl_matrix_set(W,j,i,shift);
             }
@@ -705,7 +705,7 @@ void backpropagation(const void *n,const void *d)
         // counter,current loss and the current mean square error into the
         // standard output stream.
         err_curr=mean_square_error_calculate(nn,&D,&data->size1); epoch_counter+=1; loss=fabs(err_curr-err_prev);
-        printf(CYN"EPOCHS"RESET" = %lld, "RED"LOSS"RESET" = %g, "YEL"MSE"RESET" = %g\n",epoch_counter,loss,err_curr);
+        printf(CYN"EPOCHS"RESET" = %lld, "BLU"LOSS"RESET" = %g, "YEL"MSE"RESET" = %g\n",epoch_counter,loss,err_curr);
     } while (loss>nn->config->epsilon && epoch_counter<nn->config->epochs);
     return;
 }

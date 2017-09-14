@@ -69,6 +69,8 @@
  * is the matrix that contains the generated output signal
  * from each neuron in the layer.The fourth field,namely
  * D is the gradient value for each neuron in the layer.
+ * The fifth field is the synaptic weights matrix from
+ * the previous training epoch.
  * 
  */
 

@@ -1,0 +1,13 @@
+
+For the dataset at the datasets/thyroid-train.data the following neural network configurations give a very good generalizer:
+
+
+    ./neuralnet --train --pattern-classification --normalization=yes --in-file=datasets/thyroid-train.data --dump-dir=thyroidologist --signals=5 --nlayers=2 --neurons-per-layer=[20,3] --activation=lgst --epsilon=1e-12 --eta=0.5 --momentum=0.009 --epochs=700
+
+
+
+
+For the dataset at the datasets/iris.data the following neural network configurations give a very good generalizer:
+    
+
+    ./neuralnet --train --pattern-classification --normalization=yes --in-file=datasets/iris.data --dump-dir=iris_model --signals=4 --nlayers=2 --neurons-per-layer=[4,3] --activation=lgst --epsilon=1e-09 --eta=0.5 --momentum=0.009 --epochs=70
