@@ -61,7 +61,7 @@
  * called llint.Defining a new data structure called 
  * neural_layer_t that represents the abstract concept
  * of a layer of nodes in an artificial neural network.
- * The layer data type has three gsl matrices as fields.
+ * The layer data type has five gsl matrices as fields.
  * The first field,namely W, is the weight's matrix for
  * the current layer.The second field,namely I, is the
  * matrix that contains the linear aggregators for each

@@ -1,0 +1,36 @@
+{
+  "name": "webapp",
+  "version": "1.0.0",
+  "description": "thyroidologist user-interface",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "lib": "lib",
+    "test": "test"
+  },
+  "dependencies": {
+    "chai": "^4.1.2",
+    "express": "^4.15.4",
+    "pug": "^2.0.0-rc.4",
+    "socket.io": "^2.0.3"
+  },
+  "devDependencies": {
+    "mocha": "^3.5.3"
+  },
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": ".git"
+  },
+  "keywords": [
+    "ann",
+    "thyroid",
+    "classification",
+    "nodejs",
+    "socketio"
+  ],
+  "author": "Endri Kastrati",
+  "license": "ISC"
+}

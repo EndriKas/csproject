@@ -42,7 +42,6 @@ momentum=0.04;      % Setting the momentum value fo the training process.
 epochs=200;         % Setting the total number of epochs.
 alph=3.0;           % Setting the alpha coefficient value of the activation function.
 bet=1.0;            % Setting the beta coefficient value of the activation function.
-figure;             % Setting up a plotting figure.
 
 
 
