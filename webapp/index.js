@@ -55,22 +55,44 @@ io.on("connect",function(socket)
     // user votings.
     console.log("a user has connected");
 
-
+    // When a package is received on the 'diagnosis'
+    // communication channel,fetch the received data
+    // into the './neuralnet' process located at the
+    // parent directory.The neural network program
+    // classifies the given dataset and prints into
+    // the standard output the result.The result is
+    // retrieved by thoe node interpreter and send
+    // back to the client.
     socket.on("diagnosis",function(data)
     {
+        // Indicating to the standard output that
+        // a request for a new diagnosis has been
+        // received.
         console.log("new diagnosis request");
         console.log(data);
+
+        // Concating the necessary command line arguments for
+        // executing the neural network program located at the
+        // parent directory for classification purposes.
         var command="../neuralnet --predict --pattern-classification \
             --normalization=yes --in-file=stdin --load-dir=../thyroidologist";
+
+        // Execute the above command line string as a subprocess.
         var child=cp.exec(command,function(error,stdout,stderr)
         {
+            // If something went wrong,output the error message,
+            // otherwise send via socket the output result back
+            // to the client that requested the diagnosis.
             if (error) { console.log(error); return; }
             socket.emit("results",{ prediction: stdout });
         });
-        child.stdin.write("1\n");
-        child.stdin.write("5\n");
+
+        // At this point the process is waiting for input.
+        child.stdin.write("1\n");   // specifying 1 row to be fetched to the neural net.
+        child.stdin.write("5\n");   // specifying 5 columsn to be fetched to the neural net.
+        // fetching the dataset provided by the client into the neural network.
         child.stdin.write(data.c0+" "+data.c1+" "+data.c2+" "+data.c3+" "+data.c4+"\n");
-        child.stdin.end();
+        child.stdin.end();  // Closing the stdin writing stream.
     });
 
 
