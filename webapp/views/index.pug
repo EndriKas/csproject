@@ -3,7 +3,7 @@ html(lang="en")
     head
         meta(charset="utf-8")
         meta(name="viewport",contents="width=device-width,initial-scale=1.0")
-        title="Digital Thyroidologist"
+        title="home page"
         link(rel="stylesheet",href="assets/bootstrap/css/bootstrap.min.css")
         link(rel="stylesheet",href="assets/css/Google-Style-Text-Input.css")
         link(rel="stylesheet",href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css")
@@ -12,10 +12,10 @@ html(lang="en")
         link(rel="stylesheet",href="assets/css/styles.css")
     body
         div(data-aos="fade-up")
-            nav(class="navbar navbar-default navigation-clean")
+            nav(class="navbar navbar-default navigation-clean") 
                 div(class="container")
                     div(class="navbar-header")
-                        a(class="navbar-brand navbar-link" href="#")
+                        a(class="navbar-brand navbar-link" href="#") Digital Thyroidologist
                         button(class="navbar-toggle collapsed",data-toggle="collapse",data-target="#navcol-1")
                             span(class="sr-only") Toggle navigation
                             span(class="icon-bar")
@@ -23,12 +23,13 @@ html(lang="en")
                             span(class="icon-bar")
                     div(class="collapse navbar-collapse",id="navcol-1")
                         ul(class="nav navbar-nav navbar-right")
-                            li(class="active",role="presentation")
-                                a(href="#") First item 
                             li(role="presentation")
-                                a(href="#") Second item
+                                a(href="#") Help
                             li(role="presentation")
-                                a(href="#") Thrid item
+                                a(href="#") About
+        <br />
+        <br />
+        <br />
         div(class="container",data-aos="fade-up")
             div(class="row")
                 div(class="col-lg-6 col-lg-offset-0 col-md-12")
@@ -59,21 +60,12 @@ html(lang="en")
                         label Maximal absolute difference of TSH
                     button(class="btn btn-default",type="button",id="diagnose") diagnose
                 div(class="col-lg-6 col-md-12")
-                    img(src="assets/img/free-stock-vector-illustration-set-robots-robot-drawing-cartoon-technology-machine01.jpg",data-bs-hover-animate="bounce")
+                    div(class="jumbotron")
+                        img(src="assets/img/thyroid.jpg",width="100",height="100")
+                        h2(class="display-4") Thyroid Disease Classifier
+                        p(class="lead") A deep learning approach to thyroid disease diagnosis. Enter data to get a diagnosis.
                 div(class="col-lg-4 col-lg-offset-2 col-md-12")
-                    label(id="result",style="font-size:45px;")
-                div(class="container")
-                    div(class="row")
-                        div(id="loader",style="display:none")
-                            div(class="dot")
-                            div(class="dot")
-                            div(class="dot")
-                            div(class="dot")
-                            div(class="dot")
-                            div(class="dot")
-                            div(class="dot")
-                            div(class="dot")
-                            div(class="lading")
+                    a(href="#",id="result",style="font-size:45px;")
     script(src="assets/js/jquery.min.js")
     script(src="assets/bootstrap/js/bootstrap.min.js")
     script(src="assets/js/bs-animation.js")
