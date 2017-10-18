@@ -1,0 +1,118 @@
+commit 5d7f47abff9194a6a19bdf12dfac724a43da8245
+Author: Endri Kastrati <endriau@gmail.com>
+Date:   Mon Oct 16 21:25:10 2017 +1100
+
+    Completed the final project report
+
+commit 94ac88bb3fb244d526bda26e43ba2310f3c6c1c0
+Author: Endri Kastrati <endriau@gmail.com>
+Date:   Mon Oct 9 18:24:56 2017 +1100
+
+    completed a few changes to the user-interface
+
+commit 950c396e07da3a0e2e3343927b2c454ff9586ced
+Author: Endri Kastrati <endriau@gmail.com>
+Date:   Wed Oct 4 12:02:38 2017 +1100
+
+    Completed a minimalistic documentation of the webapp code.
+
+commit 42fd9797cdc9e1eef5e24621318f92c1d326e064
+Author: Endri Kastrati <endriau@gmail.com>
+Date:   Wed Oct 4 11:36:44 2017 +1100
+
+    Completed the user-interface for the online thyroidologist app.
+
+commit 094a743aaa6eeae843a94dcd4f938307d87603e2
+Author: Endri Kastrati <endriau@gmail.com>
+Date:   Thu Sep 14 15:31:03 2017 +1000
+
+    Completed code documentation and implemented a couple of octave
+    scripts that visualize the curve approximation for different
+    functions.
+
+commit 35b92dd7ec165683834a73c061fc808c951fdcfb
+Author: Endri Kastrati <endriau@gmail.com>
+Date:   Sun Sep 10 12:42:58 2017 +1000
+
+    Optimized the back-propagation algorithm using the momentum parameter.
+    More specifically modified the neural layer data structure and the
+    neural configuration data structure to enable the storage of the
+    local gradient matrix and the synaptic weights matrix from the
+    previous training epochs.
+
+commit 79ec7035e46a92bd4c193dc34521842b285b18ff
+Author: Endri Kastrati <endriau@gmail.com>
+Date:   Wed Sep 6 19:38:06 2017 +1000
+
+    Fixed a few bugs and creating a couple of trained networks on some datasets.
+
+commit 8825cf62518387062c08a10409d875d0fcf6206a
+Author: Endri Kastrati <endriau@gmail.com>
+Date:   Tue Sep 5 14:56:28 2017 +1000
+
+    Completed the dumping of the trained neural network into binary
+    as well as the loading of the trained neural network from binary.
+
+commit c91e252853b41c25e47371d402431ae1d1c20695
+Author: Endri Kastrati <endriau@gmail.com>
+Date:   Mon Sep 4 20:32:52 2017 +1000
+
+    implemented the dataset data structure.
+
+commit 601b37e2b58db1e8773304769452c0a460950d07
+Author: Endri Kastrati <endriau@gmail.com>
+Date:   Wed Aug 30 22:57:58 2017 +1000
+
+    Structured the file hierarchy of the application and completed the
+    command line arguments interface for the training process of the
+    neural network.Next commit will include ability to dump model into
+    binary files and load them for predictions.
+
+commit 123b2769b3c4a5e6cd023fa46bc52a2119ea2944
+Author: Endri Kastrati <endriau@gmail.com>
+Date:   Wed Aug 30 15:38:43 2017 +1000
+
+    Changed optimization method
+
+commit b1762b0be799be22b5ea052a4bcee8c0b76ff292
+Author: Endri Kastrati <endriau@gmail.com>
+Date:   Wed Aug 30 13:55:39 2017 +1000
+
+    still debugging the resilient algorithm
+
+commit 22d6674c1e255b86f70c93876842565a2c14e97b
+Author: Endri Kastrati <endriau@gmail.com>
+Date:   Wed Aug 30 13:40:37 2017 +1000
+
+    debugging process
+
+commit 2b18c56d64165cc4ef95b7d7bb4fe81ee31fc1e4
+Author: Endri Kastrati <endriau@gmail.com>
+Date:   Wed Aug 30 12:56:57 2017 +1000
+
+    working on the resilient back-propagation algorithm
+
+commit 61b6c04b4b82a1a529c91168a545dd4489f9da6b
+Author: Endri Kastrati <endriau@gmail.com>
+Date:   Tue Aug 29 19:53:18 2017 +1000
+
+    Tested the neural network on both pattern classification problems
+    and curve fitting problems and it works correctly.
+
+commit 2e5f3add01a4bc6b27a6d331aea5decdc6cd208e
+Author: Endri Kastrati <endriau@gmail.com>
+Date:   Mon Aug 28 23:01:48 2017 +1000
+
+    completed the back propagation algorithm
+
+commit 126380e18cab18d734553aae42315840a2b18409
+Author: Endri Kastrati <endriau@gmail.com>
+Date:   Sat Aug 26 19:58:58 2017 +1000
+
+    Started working on neural network data structure and the back-propagation algorithm
+
+commit bb3103ed22e40b8be585b8c14b28a3b4545e1131
+Author: Endri Kastrati <endriau@gmail.com>
+Date:   Wed Aug 23 16:03:12 2017 +1000
+
+    finished the implementation of the neural layer data structure
